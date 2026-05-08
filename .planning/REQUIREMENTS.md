@@ -99,50 +99,48 @@
 
 ## Traceability
 
-Populated during roadmap creation.
-
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| INFRA-01 | — | Pending |
-| INFRA-02 | — | Pending |
-| INFRA-03 | — | Pending |
-| INFRA-04 | — | Pending |
-| INGEST-01 | — | Pending |
-| INGEST-02 | — | Pending |
-| INGEST-03 | — | Pending |
-| INGEST-04 | — | Pending |
-| INGEST-05 | — | Pending |
-| INGEST-06 | — | Pending |
-| INGEST-07 | — | Pending |
-| QUERY-01 | — | Pending |
-| QUERY-02 | — | Pending |
-| QUERY-03 | — | Pending |
-| QUERY-04 | — | Pending |
-| QUERY-05 | — | Pending |
-| WIDGET-01 | — | Pending |
-| WIDGET-02 | — | Pending |
-| WIDGET-03 | — | Pending |
-| WIDGET-04 | — | Pending |
-| WIDGET-05 | — | Pending |
-| WIDGET-06 | — | Pending |
-| WIDGET-07 | — | Pending |
-| WIDGET-08 | — | Pending |
-| LEADS-01 | — | Pending |
-| LEADS-02 | — | Pending |
-| LEADS-03 | — | Pending |
-| LEADS-04 | — | Pending |
-| ADMIN-01 | — | Pending |
-| ADMIN-02 | — | Pending |
-| ADMIN-03 | — | Pending |
-| ADMIN-04 | — | Pending |
-| ADMIN-05 | — | Pending |
-| ADMIN-06 | — | Pending |
+| INFRA-01 | Phase 1 | Pending |
+| INFRA-02 | Phase 1 | Pending |
+| INFRA-03 | Phase 1 | Pending |
+| INFRA-04 | Phase 1 | Pending |
+| INGEST-01 | Phase 2 | Pending |
+| INGEST-02 | Phase 2 | Pending |
+| INGEST-03 | Phase 2 | Pending |
+| INGEST-04 | Phase 2 | Pending |
+| INGEST-05 | Phase 2 | Pending |
+| INGEST-06 | Phase 2 | Pending |
+| INGEST-07 | Phase 2 | Pending |
+| QUERY-01 | Phase 3 | Pending |
+| QUERY-02 | Phase 3 | Pending |
+| QUERY-03 | Phase 3 | Pending |
+| QUERY-04 | Phase 3 | Pending |
+| QUERY-05 | Phase 3 | Pending |
+| ADMIN-01 | Phase 4 | Pending |
+| ADMIN-02 | Phase 4 | Pending |
+| ADMIN-03 | Phase 4 | Pending |
+| ADMIN-04 | Phase 4 | Pending |
+| ADMIN-05 | Phase 4 | Pending |
+| ADMIN-06 | Phase 4 | Pending |
+| WIDGET-01 | Phase 5 | Pending |
+| WIDGET-02 | Phase 5 | Pending |
+| WIDGET-03 | Phase 5 | Pending |
+| WIDGET-04 | Phase 5 | Pending |
+| WIDGET-05 | Phase 5 | Pending |
+| WIDGET-06 | Phase 5 | Pending |
+| WIDGET-07 | Phase 5 | Pending |
+| WIDGET-08 | Phase 5 | Pending |
+| LEADS-01 | Phase 6 | Pending |
+| LEADS-02 | Phase 6 | Pending |
+| LEADS-03 | Phase 6 | Pending |
+| LEADS-04 | Phase 6 | Pending |
 
 **Coverage:**
 - v1 requirements: 34 total
-- Mapped to phases: 0 (pending roadmap)
-- Unmapped: 34 ⚠️ (to be resolved by roadmap)
+- Mapped to phases: 34 (all mapped)
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-05-07*
-*Last updated: 2026-05-07 after initial definition*
+*Last updated: 2026-05-07 after roadmap creation — traceability populated*
