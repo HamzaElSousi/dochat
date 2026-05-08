@@ -31,7 +31,11 @@
   2. sqlite-vec initializes with WAL mode and 10s busy timeout; a test vector insert and retrieval succeeds
   3. All data files (DB, uploads) are confirmed to live at `~/dochat/storage/` — nothing written under `public_html/`
   4. All secrets (API key, admin password) are loaded from `.env` and verified absent from source files
-**Plans:** TBD
+**Plans:** 2 plans
+
+Plans:
+- [ ] 01-01-PLAN.md — Build project scaffold locally: passenger_wsgi.py, Flask factory, sqlite-vec db.py with WAL + fallback, /health route, pytest suite
+- [ ] 01-02-PLAN.md — Deploy scaffold to SiteGround via SSH + git pull, configure cPanel Python Selector, verify live /health endpoint
 
 ### Phase 2: Document Ingestion Pipeline
 **Goal:** Admin can submit any supported document or URL and the system indexes it — so there is a populated knowledge base for the query pipeline to search.
@@ -106,7 +110,7 @@
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Infrastructure & Deployment Validation | 0/? | Not started | - |
+| 1. Infrastructure & Deployment Validation | 0/2 | Planned | - |
 | 2. Document Ingestion Pipeline | 0/? | Not started | - |
 | 3. Query Pipeline & RAG Logic | 0/? | Not started | - |
 | 4. Admin UI | 0/? | Not started | - |
@@ -158,4 +162,4 @@
 
 ---
 *Roadmap created: 2026-05-07*
-*Last updated: 2026-05-07 after initial creation*
+*Last updated: 2026-05-08 — Phase 1 plans created (01-01-PLAN.md, 01-02-PLAN.md)*
