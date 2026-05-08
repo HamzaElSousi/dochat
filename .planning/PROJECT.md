@@ -49,7 +49,7 @@ A visitor asks a question and gets a correct, sourced answer from your actual do
 ## Constraints
 
 - **Hosting**: SiteGround shared hosting — no Docker, no root access, limited RAM per process. Must use Python Selector (Passenger WSGI) or prove it needs the VPS.
-- **Vector DB**: Must be file-based (SQLite/ChromaDB) — no managed database server on shared hosting.
+- **Vector DB**: Must be file-based — SiteGround shared hosting has MySQL only (no PostgreSQL/pgvector). ChromaDB (SQLite-backed) or FAISS are the candidates — no DB server required for either.
 - **Budget**: Minimize recurring costs. OpenRouter free tier for LLM; no paid vector DB service needed.
 - **Embeddings**: Either use OpenRouter's embedding endpoint or a lightweight local model (sentence-transformers) — prefer API to avoid RAM limits.
 - **Widget compatibility**: Must work on sites that can't install npm packages — plain JS, no build step required for embedding.

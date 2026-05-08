@@ -1,0 +1,28 @@
+# Secrets — NEVER commit
+.env
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+dist/
+build/
+*.so
+
+# Virtualenv
+venv/
+.venv/
+env/
+
+# Test artifacts
+.pytest_cache/
+.coverage
+htmlcov/
+
+# SQLite WAL companion files (never under web root anyway, but belt-and-suspenders)
+*.db-shm
+*.db-wal
+
+# Storage (local dev only — on server this is outside the repo at ~/dochat/storage/)
+storage/
