@@ -1,6 +1,9 @@
 # Secrets — NEVER commit
 .env
 
+# Local dev notes
+ToDo_*.md
+
 # Python
 __pycache__/
 *.py[cod]
