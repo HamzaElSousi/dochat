@@ -7,27 +7,27 @@
 ## Project Reference
 
 **Core Value:** A visitor asks a question and gets a correct, sourced answer from your actual documents — not a hallucination and not a dead end.
-**Current Focus:** Phase 3 — Query Pipeline & RAG Logic
+**Current Focus:** Phase 4 — Admin UI
 **Milestone:** v1 — Embeddable RAG chatbot on SiteGround shared hosting
 
 ---
 
 ## Current Position
 
-**Phase:** 3 of 6 — Query Pipeline & RAG Logic
-**Status:** Phase 3 in progress — Plan 01 complete (1/5 plans done)
-**Last session:** 2026-05-09 — Phase 3 Plan 01 executed (sessions table, embed_query wrapper, chat_bp stub; 50/50 tests pass)
+**Phase:** 4 of 6 — Admin UI (next)
+**Status:** Phase 3 complete — 5/5 plans done; ready for Phase 4
+**Last session:** 2026-05-09 — Phase 3 fully executed (handle_chat RAG pipeline, /chat route, CORS, archive cron, 62/62 tests pass; verification 19/19 passed)
 
 **Progress:**
 ```
 Phase 1 [##########] 100% ✅
 Phase 2 [##########] 100% ✅ (4/4 plans)
-Phase 3 [##        ] 20% (1/5 plans done)
+Phase 3 [##########] 100% ✅ (5/5 plans)
 Phase 4 [          ] 0%
 Phase 5 [          ] 0%
 Phase 6 [          ] 0%
 
-Overall [####      ] 31%
+Overall [######    ] 50%
 ```
 
 ---
@@ -36,10 +36,10 @@ Overall [####      ] 31%
 
 | Metric | Value |
 |--------|-------|
-| Phases complete | 1 / 6 |
-| Plans complete | 1 / 5 (Phase 3) |
+| Phases complete | 3 / 6 |
+| Plans complete | 5 / 5 (Phase 3) |
 | Requirements mapped | 34 / 34 |
-| Requirements done | 10 / 34 (INFRA-01..04 done; INGEST-01,02,03,05,06,07 done; INGEST-04 URL in progress) |
+| Requirements done | 15 / 34 (INFRA-01..04, INGEST-01..07, QUERY-01..05 done) |
 | Last session | 2026-05-09 |
 
 ---
@@ -67,6 +67,10 @@ Overall [####      ] 31%
 | sessions table uses manual conn.commit() (not context manager) | Consistent with init_document_tables() idiom — avoids sqlite3 context manager + BEGIN conflict | Phase 3 |
 | chat_bp stub created in Plan 01 before Plan 03 route file exists | Allows app factory to import cleanly and existing tests to pass; Plan 03 replaces stub | Phase 3 |
 | embed_query() delegates to embed_chunks([text])[0] | Thin wrapper reuses all existing error handling; zero new dependencies | Phase 3 |
+| _call_llm_with_retry catches RequestException (superset) | Covers connection-level failures beyond just Timeout+HTTPError; documented deviation from plan | Phase 3 |
+| _call_llm wraps choices[0] access in try/except | OpenRouter returns 200 with no choices on content-filter refusals; KeyError/IndexError bypasses fallback without the guard | Phase 3 |
+| ALLOWED_ORIGINS read at module load (CGI safe) | Fresh process per CGI request means module is re-imported each time — env vars are effectively per-request | Phase 3 |
+| archive_sessions.py standalone (no Flask context) | Cron jobs cannot instantiate a Flask app; uses sys.path + _open_db() directly | Phase 3 |
 
 ### Resolved Questions (from Phase 1)
 
@@ -100,11 +104,11 @@ None currently.
 
 ### Last Session (2026-05-09)
 
-**What happened:** Phase 3 Plan 01 executed. Sessions table DDL added to app/db.py, embed_query() wrapper added to app/ingest/embedder.py, chat_bp stub wired into app/__init__.py. All 50 existing tests still pass. Zero deviations from plan.
+**What happened:** Phase 3 fully executed (5/5 plans, 4 waves). Built: sessions table DDL + `embed_query()` wrapper (Plan 01), `handle_chat()` RAG pipeline with primary→fallback LLM retry + session persistence (Plan 02), full `POST /chat` HTTP endpoint with CORS (Plan 03), standalone `archive_sessions.py` cron script + PyMySQL (Plan 04), 12-test suite for all QUERY requirements (Plan 05). Verification: 19/19 must-haves passed. Code review: 1 critical (CR-01 malformed LLM response) fixed inline. 62/62 tests passing.
 
-**Where we stopped:** Phase 3 Wave 1 complete. Wave 2 starts with 03-02 (query service) and 03-04 (archive cron) — these can run in parallel.
+**Where we stopped:** Phase 3 complete. Phase 4 (Admin UI) is next.
 
-**Next action:** `/gsd-execute-phase 3` for Plan 02 (query service)
+**Next action:** `/gsd-discuss-phase 4` or `/gsd-plan-phase 4`
 
 ---
 
@@ -113,7 +117,9 @@ None currently.
 | Phase | Completed | Notes |
 |-------|-----------|-------|
 | 1 — Infrastructure & Deployment Validation | 2026-05-09 | CGI deployment, native sqlite-vec, live on staging |
+| 2 — Document Ingestion Pipeline | 2026-05-09 | PDF/DOCX/TXT/URL ingest, chunking, embeddings, 50/50 tests |
+| 3 — Query Pipeline & RAG Logic | 2026-05-09 | handle_chat() RAG pipeline, /chat endpoint, CORS, archive cron, 62/62 tests |
 
 ---
 *STATE initialized: 2026-05-07*
-*Last updated: 2026-05-09 after Phase 1 completion*
+*Last updated: 2026-05-09 after Phase 3 completion*

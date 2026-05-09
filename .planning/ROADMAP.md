@@ -12,7 +12,7 @@
 
 - [ ] **Phase 1: Infrastructure & Deployment Validation** — Confirm SiteGround compatibility (Passenger WSGI, sqlite-vec, RAM, SQLite version) before writing any application logic
 - [x] **Phase 2: Document Ingestion Pipeline** — Admin can upload PDF/DOCX/TXT/MD files and submit URLs; system parses, chunks, embeds, and indexes all content *(completed 2026-05-09)*
-- [ ] **Phase 3: Query Pipeline & RAG Logic** — Visitor messages are embedded, searched, gated by similarity threshold, and answered by LLM with session history
+- [x] **Phase 3: Query Pipeline & RAG Logic** — Visitor messages are embedded, searched, gated by similarity threshold, and answered by LLM with session history *(completed 2026-05-09)*
 - [ ] **Phase 4: Admin UI** — Password-protected web UI for document management, URL submission, and lead review
 - [ ] **Phase 5: Chat Widget** — Embeddable vanilla JS widget with Shadow DOM isolation, theming, and full UX polish
 - [ ] **Phase 6: Lead Capture** — Similarity fallback triggers inline lead form; captured leads stored, emailed, and viewable by admin
@@ -78,10 +78,10 @@ Plans:
 
 Plans:
 - [x] 03-01-PLAN.md — DB foundation: sessions table in app/db.py, embed_query() wrapper in embedder.py, chat_bp stub in app/__init__.py
-- [ ] 03-02-PLAN.md — Query service: app/services/query.py with full handle_chat() pipeline (embed → search → gate → LLM retry → session save)
-- [ ] 03-03-PLAN.md — Chat route: full app/routes/chat.py with CORS handling, .env.example Phase 3 vars
-- [ ] 03-04-PLAN.md — MySQL archival cron: scripts/archive_sessions.py standalone script + PyMySQL dependency
-- [ ] 03-05-PLAN.md — Chat endpoint tests: tests/test_chat.py with 10 behavioral test cases
+- [x] 03-02-PLAN.md — Query service: app/services/query.py with full handle_chat() pipeline (embed → search → gate → LLM retry → session save)
+- [x] 03-03-PLAN.md — Chat route: full app/routes/chat.py with CORS handling, .env.example Phase 3 vars
+- [x] 03-04-PLAN.md — MySQL archival cron: scripts/archive_sessions.py standalone script + PyMySQL dependency
+- [x] 03-05-PLAN.md — Chat endpoint tests: tests/test_chat.py with 10 behavioral test cases
 
 **Wave dependency notes:**
 - **Wave 1** — 03-01 (DB foundation + embed wrapper)
@@ -140,7 +140,7 @@ Plans:
 |-------|----------------|--------|-----------|
 | 1. Infrastructure & Deployment Validation | 2/2 | Complete | 2026-05-09 |
 | 2. Document Ingestion Pipeline | 4/4 | Complete | 2026-05-09 |
-| 3. Query Pipeline & RAG Logic | 1/5 | In Progress | - |
+| 3. Query Pipeline & RAG Logic | 5/5 | Complete | 2026-05-09 |
 | 4. Admin UI | 0/? | Not started | - |
 | 5. Chat Widget | 0/? | Not started | - |
 | 6. Lead Capture | 0/? | Not started | - |
@@ -196,3 +196,4 @@ Plans:
 *Updated: 2026-05-09 — Phase 2 Plans 02–04 complete (file ingest + URL ingest + service tests; 50/50 tests pass); Phase 2 marked complete*
 *Updated: 2026-05-09 — Phase 3 plans created (03-01 through 03-05); 5 plans in 4 waves*
 *Updated: 2026-05-09 — Phase 3 Plan 01 complete (sessions table, embed_query wrapper, chat_bp stub; 50/50 tests pass)*
+*Updated: 2026-05-09 — Phase 3 complete (5/5 plans; handle_chat RAG pipeline, /chat route, CORS, archive cron, 62/62 tests pass)*
