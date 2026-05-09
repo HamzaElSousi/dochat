@@ -82,6 +82,24 @@ def init_document_tables(conn: sqlite3.Connection) -> None:
     conn.commit()
 
 
+def init_session_tables(conn: sqlite3.Connection) -> None:
+    """Create sessions table if it does not exist.
+
+    session_id: UUID string (server-generated, D-02)
+    messages:   JSON array of {"role": "user"|"assistant", "content": "..."} (D-01)
+    last_active: ISO-8601 UTC — cron script uses this for 24-hour TTL expiry (D-03)
+    """
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS sessions (
+            session_id TEXT PRIMARY KEY,
+            messages   TEXT NOT NULL,
+            created_at TEXT NOT NULL,
+            last_active TEXT NOT NULL
+        )
+    """)
+    conn.commit()
+
+
 def init_db(app: flask.Flask) -> None:
     """Initialize sqlite-vec DB. Called once from create_app().
 
@@ -97,6 +115,7 @@ def init_db(app: flask.Flask) -> None:
     conn = _open_db(db_path)
     mode = _load_sqlite_vec(conn)
     init_document_tables(conn)
+    init_session_tables(conn)   # new — D-01
 
     app.config['DB_CONN'] = conn
     app.config['SQLITE_VEC_MODE'] = mode
