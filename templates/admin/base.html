@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DocChat Admin</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
+  <style>
+    /* Drop zone */
+    #drop-zone {
+      border: 2px dashed #ccc;
+      border-radius: 8px;
+      padding: 1.5rem;
+      text-align: center;
+      min-height: 96px;
+      cursor: pointer;
+      transition: border-color 0.15s, background-color 0.15s;
+    }
+    #drop-zone.dragover {
+      border-color: var(--pico-primary);
+      background-color: #eaf4fc;
+    }
+    #drop-zone.uploading {
+      pointer-events: none;
+      opacity: 0.7;
+    }
+    /* Spinner */
+    .spinner-icon {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid #ccc;
+      border-top-color: var(--pico-primary);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    /* Error box */
+    #upload-error {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.5rem;
+      background: #fdecea;
+      border-left: 4px solid #c0392b;
+      border-radius: 4px;
+      padding: 0.75rem 1rem;
+      margin-top: 0.5rem;
+      color: #c0392b;
+    }
+    #upload-error[hidden] { display: none; }
+    #dismiss-error {
+      margin-left: auto;
+      background: none;
+      border: none;
+      color: #c0392b;
+      cursor: pointer;
+      padding: 0 0.25rem;
+      font-size: 1rem;
+    }
+    /* Status badges */
+    .status-badge {
+      display: inline-block;
+      padding: 0.15rem 0.5rem;
+      border-radius: 999px;
+      font-size: 0.875rem;
+      font-weight: 400;
+    }
+    .status-ready    { background: #e6f4ea; color: #2d6a4f; }
+    .status-processing { background: #fff3cd; color: #7d5a00; }
+    .status-error    { background: #fdecea; color: #c0392b; }
+    /* Delete button */
+    .delete-btn {
+      background: none;
+      border: none;
+      color: var(--pico-muted-color);
+      cursor: pointer;
+      font-size: 1rem;
+      padding: 0.25rem 0.5rem;
+      border-radius: 4px;
+      transition: color 0.15s, background-color 0.15s;
+    }
+    .delete-btn:hover {
+      color: #c0392b;
+      background: #fdecea;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <nav>
+      <ul><li><strong>DocChat Admin</strong></li></ul>
+      <ul>
+        <li><a href="/dochat/admin/docs" {% if active_page == 'docs' %}aria-current="page"{% endif %}>Documents</a></li>
+        <li><a href="/dochat/admin/leads" {% if active_page == 'leads' %}aria-current="page"{% endif %}>Leads</a></li>
+      </ul>
+    </nav>
+  </header>
+  <main class="container">
+    {% block content %}{% endblock %}
+  </main>
+  <script src="{{ url_for('static', filename='admin.js') }}"></script>
+</body>
+</html>

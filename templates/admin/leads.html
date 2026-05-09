@@ -1,0 +1,33 @@
+{% set active_page = 'leads' %}
+{% extends "admin/base.html" %}
+
+{% block content %}
+<h2>Captured Leads</h2>
+
+<table role="grid" aria-label="Captured leads">
+  <thead>
+    <tr>
+      <th scope="col">Name</th>
+      <th scope="col">Email</th>
+      <th scope="col">Question Asked</th>
+      <th scope="col">Timestamp</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for lead in leads %}
+    <tr>
+      <td>{{ lead.name }}</td>
+      <td><a href="mailto:{{ lead.email }}">{{ lead.email }}</a></td>
+      <td>{{ lead.question }}</td>
+      <td><time datetime="{{ lead.timestamp }}">{{ lead.timestamp_display }}</time></td>
+    </tr>
+    {% else %}
+    <tr>
+      <td colspan="4" style="text-align:center; color: var(--pico-muted-color);">
+        No leads captured yet.
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

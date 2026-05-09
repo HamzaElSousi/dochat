@@ -1,0 +1,69 @@
+{% set active_page = 'docs' %}
+{% extends "admin/base.html" %}
+
+{% block content %}
+<h2>Upload a Document</h2>
+
+<div id="drop-zone" role="button" tabindex="0" aria-label="Drop files here or click to browse">
+  <p id="drop-zone-label">Drag &amp; drop a PDF, DOCX, TXT, or MD file here</p>
+  <p><small>or</small></p>
+  <input type="file" id="file-input" accept=".pdf,.docx,.txt,.md" hidden>
+  <button id="browse-btn" type="button">Choose File</button>
+  <div id="spinner" hidden aria-live="polite">
+    <span class="spinner-icon" aria-hidden="true"></span>
+    <span>Uploading...</span>
+  </div>
+</div>
+
+<form id="url-form" aria-label="Submit a URL for crawling">
+  <label for="url-input">Submit a URL</label>
+  <div role="group">
+    <input type="url" id="url-input" name="url"
+           placeholder="https://example.com/page"
+           required aria-describedby="url-hint">
+    <button type="submit" id="url-submit-btn">Crawl &amp; Index</button>
+  </div>
+  <small id="url-hint">The page will be crawled and its text content indexed.</small>
+</form>
+
+<div id="upload-error" role="alert" aria-live="assertive" hidden>
+  <span id="upload-error-text"></span>
+  <button type="button" id="dismiss-error" aria-label="Dismiss error">&#x2715;</button>
+</div>
+
+<h2>Indexed Documents</h2>
+
+<table role="grid" aria-label="Indexed documents">
+  <thead>
+    <tr>
+      <th scope="col">Filename</th>
+      <th scope="col">Type</th>
+      <th scope="col">Upload Date</th>
+      <th scope="col">Status</th>
+      <th scope="col">Chunks</th>
+      <th scope="col">Actions</th>
+    </tr>
+  </thead>
+  <tbody id="doc-table-body">
+    {% for doc in docs %}
+    <tr id="doc-row-{{ doc.doc_id }}" data-doc-id="{{ doc.doc_id }}">
+      <td>{{ doc.filename }}</td>
+      <td>{{ doc.type }}</td>
+      <td><time datetime="{{ doc.upload_date }}">{{ doc.upload_date_display }}</time></td>
+      <td><span class="status-badge status-{{ doc.status }}">{{ doc.status }}</span></td>
+      <td style="text-align:right">{{ doc.chunk_count }}</td>
+      <td style="text-align:center">
+        <button class="delete-btn" data-doc-id="{{ doc.doc_id }}" data-filename="{{ doc.filename }}"
+                aria-label="Delete {{ doc.filename }}" title="Delete document">&#x2715;</button>
+      </td>
+    </tr>
+    {% else %}
+    <tr>
+      <td colspan="6" style="text-align:center; color: var(--pico-muted-color);">
+        No documents uploaded yet.
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}
