@@ -7,6 +7,7 @@ from datetime import datetime, timezone
 from app.ingest.parser import detect_file_type, parse_file
 from app.ingest.chunker import chunk_text
 from app.ingest.embedder import embed_chunks
+# fetch_and_extract_url imported inline inside ingest_url() to avoid circular import risk
 
 
 def serialize_f32(vector: list[float]) -> bytes:
@@ -155,6 +156,91 @@ def ingest_file(
     return {
         "doc_id": doc_id,
         "filename": filename,
+        "chunk_count": len(chunks),
+        "status": "ready",
+    }
+
+
+def ingest_url(
+    conn: sqlite3.Connection,
+    storage_path: str,
+    url: str,
+) -> dict:
+    """Fetch URL content via trafilatura and index it with the same pipeline as file uploads.
+
+    URL documents are stored as 'url' filetype. The filename is derived from the URL
+    to support duplicate-replace detection (same URL submitted again replaces previous index).
+    No original file is written to disk (unlike ingest_file — URL content is not stored).
+
+    Rollback: if any step fails after the transaction BEGIN, the DB is rolled back and
+    the index is left unchanged (D-08). No filesystem cleanup needed (no temp file).
+
+    Returns: {"doc_id": str, "filename": str, "chunk_count": int, "status": "ready"}
+    Raises: ValueError with human-readable message on fetch/parse/chunk/embed failure.
+    """
+    from app.ingest.parser import fetch_and_extract_url
+
+    # Derive a stable filename from the URL for duplicate detection (D-07 semantics).
+    # Truncate to 200 chars to stay within any filesystem path limits; replace separators.
+    safe_url_name = url.replace('://', '_').replace('/', '_')[:200] + '.url'
+
+    doc_id = str(uuid.uuid4())
+    now_iso = datetime.now(timezone.utc).isoformat()
+
+    # Fetch and extract text (raises ValueError on failure — no DB state touched yet)
+    text = fetch_and_extract_url(url)
+
+    # Chunk text
+    chunks = chunk_text(text)
+
+    # Embed all chunks
+    embeddings = embed_chunks(chunks)
+
+    try:
+        conn.execute("BEGIN")
+
+        # Duplicate replace: if same URL was indexed before, remove it (D-07)
+        existing_row = conn.execute(
+            "SELECT id FROM documents WHERE filename = ?", [safe_url_name]
+        ).fetchone()
+        if existing_row:
+            _delete_document(conn, existing_row[0])
+
+        conn.execute(
+            "INSERT INTO documents (id, filename, filetype, uploaded_at, status, chunk_count, filepath) "
+            "VALUES (?, ?, 'url', ?, 'indexing', 0, NULL)",
+            [doc_id, safe_url_name, now_iso]
+        )
+
+        for idx, (chunk_content, embedding) in enumerate(zip(chunks, embeddings)):
+            chunk_id = str(uuid.uuid4())
+            conn.execute(
+                "INSERT INTO chunks (id, doc_id, content, chunk_index) VALUES (?, ?, ?, ?)",
+                [chunk_id, doc_id, chunk_content, idx]
+            )
+            result = conn.execute(
+                "INSERT INTO vec_items(embedding) VALUES (?)",
+                [serialize_f32(embedding)]
+            )
+            vec_rowid = result.lastrowid
+            conn.execute(
+                "INSERT INTO chunk_embeddings (chunk_id, vec_rowid) VALUES (?, ?)",
+                [chunk_id, vec_rowid]
+            )
+
+        conn.execute(
+            "UPDATE documents SET status = 'ready', chunk_count = ? WHERE id = ?",
+            [len(chunks), doc_id]
+        )
+        conn.execute("COMMIT")
+
+    except Exception:
+        conn.execute("ROLLBACK")
+        raise
+
+    return {
+        "doc_id": doc_id,
+        "filename": url,   # return original URL as filename in response (human-readable)
         "chunk_count": len(chunks),
         "status": "ready",
     }

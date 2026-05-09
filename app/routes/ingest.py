@@ -2,7 +2,7 @@ import os
 from flask import Blueprint, request, jsonify, current_app
 
 from ..auth import require_auth
-from ..services.ingestion import ingest_file
+from ..services.ingestion import ingest_file, ingest_url
 
 ingest_bp = Blueprint('ingest', __name__)
 
@@ -44,3 +44,28 @@ def upload():
     except Exception:
         # Never expose stack traces to the client (T-02-06)
         return jsonify({"error": "Internal server error during ingestion", "filename": filename}), 500
+
+
+@ingest_bp.route('/admin/ingest/url', methods=['POST'])
+@require_auth
+def url_ingest():
+    """Accept JSON {"url": "..."}, crawl the URL, index content.
+
+    Returns JSON: {"doc_id": str, "filename": str, "chunk_count": int, "status": "ready"}
+    Errors: 400 (missing url field), 422 (fetch/parse failure), 500 (unexpected)
+    """
+    conn = current_app.config.get('DB_CONN')
+    storage_path = current_app.config.get('STORAGE_PATH')
+
+    data = request.get_json(silent=True) or {}
+    url = data.get('url', '').strip()
+    if not url:
+        return jsonify({"error": "Missing required field: 'url'"}), 400
+
+    try:
+        result = ingest_url(conn, storage_path, url)
+        return jsonify(result), 200
+    except ValueError as e:
+        return jsonify({"error": str(e), "url": url}), 422
+    except Exception:
+        return jsonify({"error": "Internal server error during URL ingestion", "url": url}), 500
