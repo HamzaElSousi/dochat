@@ -37,6 +37,45 @@ def _load_sqlite_vec(conn: sqlite3.Connection) -> str:
         return "python-fallback"
 
 
+def init_document_tables(conn: sqlite3.Connection) -> None:
+    """Create document, chunk, and vector tables if they do not exist.
+
+    vec_items MUST use distance_metric=cosine — Phase 3 similarity threshold
+    (~0.35) is calibrated for cosine distance. Omitting this defaults to L2,
+    which breaks Phase 3 silently.
+    """
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS documents (
+            id TEXT PRIMARY KEY,
+            filename TEXT NOT NULL,
+            filetype TEXT NOT NULL,
+            uploaded_at TEXT NOT NULL,
+            status TEXT NOT NULL DEFAULT 'indexing',
+            chunk_count INTEGER DEFAULT 0,
+            filepath TEXT
+        )
+    """)
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS chunks (
+            id TEXT PRIMARY KEY,
+            doc_id TEXT NOT NULL REFERENCES documents(id),
+            content TEXT NOT NULL,
+            chunk_index INTEGER NOT NULL
+        )
+    """)
+    conn.execute("""
+        CREATE VIRTUAL TABLE IF NOT EXISTS vec_items
+        USING vec0(embedding float[1536] distance_metric=cosine)
+    """)
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS chunk_embeddings (
+            chunk_id TEXT NOT NULL,
+            vec_rowid INTEGER NOT NULL
+        )
+    """)
+    conn.commit()
+
+
 def init_db(app: flask.Flask) -> None:
     """Initialize sqlite-vec DB. Called once from create_app().
 
@@ -51,6 +90,7 @@ def init_db(app: flask.Flask) -> None:
     db_path = os.path.join(storage_path, 'dochat.db')
     conn = _open_db(db_path)
     mode = _load_sqlite_vec(conn)
+    init_document_tables(conn)
 
     app.config['DB_CONN'] = conn
     app.config['SQLITE_VEC_MODE'] = mode
