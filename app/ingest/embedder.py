@@ -51,3 +51,12 @@ def embed_chunks(chunk_texts: list[str]) -> list[list[float]]:
             all_embeddings.append(e["embedding"])
 
     return all_embeddings
+
+
+def embed_query(text: str) -> list[float]:
+    """Embed a single visitor query string. Thin wrapper around embed_chunks().
+
+    Returns a 1536-dim float vector (same model as document embeddings).
+    Raises ValueError on empty input; raises requests.HTTPError on API failure.
+    """
+    return embed_chunks([text])[0]
