@@ -3,6 +3,7 @@ import os
 import zipfile
 
 import pdfplumber
+import trafilatura
 from pdfminer.pdfdocument import PDFPasswordIncorrect
 from pdfminer.pdfparser import PDFSyntaxError
 from docx import Document
@@ -88,6 +89,39 @@ def parse_text(file_bytes: bytes) -> str:
 
 # Alias for backward compatibility with tests that call parse_txt directly
 parse_txt = parse_text
+
+
+# Explicit timeout to leave headroom within 60s Apache CGI limit.
+# Default is undocumented (~20s); 15s + embed + overhead ~ 55s worst case (T-02-12).
+_TRAFILATURA_TIMEOUT = 15
+
+
+def fetch_and_extract_url(url: str) -> str:
+    """Fetch URL and extract main text content via trafilatura.
+
+    Raises ValueError with human-readable message if:
+    - Network fetch fails (network error, SSL error, DNS failure)
+    - Page contains no extractable text (JS-rendered, empty body, paywalled)
+
+    Satisfies INGEST-04 and INGEST-07 (clear error for empty/JS pages).
+    """
+    # Set explicit download timeout before calling fetch_url.
+    # trafilatura.settings.DOWNLOAD_TIMEOUT controls the urllib/requests timeout.
+    trafilatura.settings.DOWNLOAD_TIMEOUT = _TRAFILATURA_TIMEOUT
+
+    downloaded = trafilatura.fetch_url(url)
+    if downloaded is None:
+        raise ValueError(
+            f"Failed to fetch URL — network error, SSL error, or timeout: {url}"
+        )
+
+    text = trafilatura.extract(downloaded)
+    if text is None or not text.strip():
+        raise ValueError(
+            f"No extractable text found at URL — the page may be JavaScript-rendered "
+            f"or contain no main content: {url}"
+        )
+    return text
 
 
 def parse_file(file_bytes: bytes, filetype: str) -> str:
