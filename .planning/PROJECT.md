@@ -12,7 +12,12 @@ A visitor asks a question and gets a correct, sourced answer from your actual do
 
 ### Validated
 
-(None yet — ship to validate)
+- [x] System answers questions using content retrieved from the document library (Phase 3 — handle_chat() with cosine similarity gate + LLM context grounding)
+- [x] Chat history is maintained within a session (Phase 3 — SQLite sessions table, 10-turn window, MySQL archival cron)
+- [x] Backend runs on SiteGround shared hosting via cPanel Python Selector (Phase 1 — CGI deployment confirmed)
+- [x] LLM answers are generated via OpenRouter API (Phase 3 — primary google/gemma-3-27b-it:free, fallback qwen/qwen3-next-80b-a3b-instruct:free)
+- [x] Admin can upload PDFs, Word docs, plain text, and markdown files via web UI (Phase 2 — ingest pipeline complete)
+- [x] Admin can add web pages/URLs for the system to crawl and index (Phase 2 — trafilatura URL crawl)
 
 ### Active
 
@@ -63,6 +68,14 @@ A visitor asks a question and gets a correct, sourced answer from your actual do
 | OpenRouter for LLM | Free-tier models available; avoids vendor lock-in; research may refine model choice | — Pending |
 | Script-tag widget (no npm) | Embeddable on any site including WordPress without a build step | — Pending |
 | Admin-only doc management | Single tenant simplicity — one library, one admin, no auth complexity | — Pending |
+
+## Current State
+
+Phase 3 complete — the RAG query pipeline is fully operational. `POST /chat` is a live endpoint, `handle_chat()` embeds queries, vector-searches with cosine similarity gate, calls the LLM with context restriction, retries on failure, and persists session history. 62/62 tests passing.
+
+**Phase 4 (Admin UI)** is next — password-protected web interface for document management.
+
+Last updated: 2026-05-09 — Phase 3 completion
 
 ## Evolution
 
