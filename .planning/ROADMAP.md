@@ -48,7 +48,20 @@ Plans:
   3. Admin submits a URL; trafilatura crawls the page and indexes the extracted text as chunks
   4. A corrupt, password-protected, or JS-rendered-empty document returns a clear error message to admin and leaves the index unchanged (rollback confirmed)
   5. Chunks are created with 512-token size and 100-token overlap using RecursiveCharacterTextSplitter; embeddings come from OpenRouter `text-embedding-3-small` (no local ML model invoked)
-**Plans:** TBD
+**Plans:** 4 plans
+
+Plans:
+- [ ] 02-01-PLAN.md — DB schema (4 tables incl. vec_items cosine), auth stub decorator, 6 new pip dependencies
+- [ ] 02-02-PLAN.md — File ingestion slice: parser/chunker/embedder utilities + ingestion service (atomic rollback) + upload route + upload tests
+- [ ] 02-03-PLAN.md — URL ingestion slice: fetch_and_extract_url + /admin/ingest/url route + URL tests
+- [ ] 02-04-PLAN.md — Service-layer correctness tests: rollback, chunking, batching, duplicate-replace
+
+**Wave dependency notes:**
+- **Wave 1** — 02-01 (DB schema + auth stub)
+- **Wave 2** *(blocked on Wave 1 completion)* — 02-02 (file ingest slice)
+- **Wave 3** *(blocked on Wave 2 completion)* — 02-03, 02-04 (URL slice + service tests, parallel)
+
+**Cross-cutting constraints:** `os.path.expanduser` for all storage paths; `_open_db()` for all DB connections; Manual `BEGIN`/`COMMIT`/`ROLLBACK` only (no `with conn:`); no torch/transformers in deps.
 
 ### Phase 3: Query Pipeline & RAG Logic
 **Goal:** A visitor question produces a correct, context-grounded answer — or a clean "I don't know" fallback — with session continuity across turns.
@@ -111,7 +124,7 @@ Plans:
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Infrastructure & Deployment Validation | 0/2 | Planned | - |
-| 2. Document Ingestion Pipeline | 0/? | Not started | - |
+| 2. Document Ingestion Pipeline | 0/4 | Planned | - |
 | 3. Query Pipeline & RAG Logic | 0/? | Not started | - |
 | 4. Admin UI | 0/? | Not started | - |
 | 5. Chat Widget | 0/? | Not started | - |
@@ -163,3 +176,4 @@ Plans:
 ---
 *Roadmap created: 2026-05-07*
 *Last updated: 2026-05-08 — Phase 1 plans created (01-01-PLAN.md, 01-02-PLAN.md)*
+*Updated: 2026-05-08 — Phase 2 plans created (02-01 through 02-04)*
