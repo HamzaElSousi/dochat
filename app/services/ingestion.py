@@ -1,3 +1,4 @@
+import hashlib
 import os
 import uuid
 import struct
@@ -98,6 +99,12 @@ def ingest_file(
     now_iso = datetime.now(timezone.utc).isoformat()
 
     try:
+        # Guard against leftover transaction state on the connection (CR-04).
+        # conn.in_transaction is True if sqlite3 implicitly opened a transaction
+        # for a prior DML that was never committed/rolled back. A bare BEGIN on
+        # an already-open transaction raises OperationalError.
+        if conn.in_transaction:
+            conn.execute("ROLLBACK")
         conn.execute("BEGIN")
 
         # Fetch existing doc's filepath BEFORE deleting (vec0 delete needs rowid from mapping)
@@ -113,10 +120,14 @@ def ingest_file(
                 except OSError:
                     pass  # Non-fatal — orphaned file is acceptable (T-02-09)
 
+        # CR-05: Insert filepath=tmp_path (the file exists there right now).
+        # We commit BEFORE the rename so the DB's filepath always points to a
+        # real file. After the rename succeeds, a second short transaction
+        # updates filepath to final_path.
         conn.execute(
             "INSERT INTO documents (id, filename, filetype, uploaded_at, status, chunk_count, filepath) "
             "VALUES (?, ?, ?, ?, 'indexing', 0, ?)",
-            [doc_id, filename, filetype, now_iso, final_path]
+            [doc_id, filename, filetype, now_iso, tmp_path]
         )
 
         for idx, (chunk_content, embedding) in enumerate(zip(chunks, embeddings)):
@@ -141,8 +152,19 @@ def ingest_file(
         )
         conn.execute("COMMIT")
 
+        # Rename from tmp to final location (atomic within same filesystem).
+        # DB already committed with filepath=tmp_path, so the record is always
+        # consistent with a real file. After rename, update filepath to final_path.
         os.makedirs(final_dir, exist_ok=True)
         os.rename(tmp_path, final_path)
+
+        # Short second transaction: record the final filepath now that rename succeeded.
+        conn.execute("BEGIN")
+        conn.execute(
+            "UPDATE documents SET filepath = ? WHERE id = ?",
+            [final_path, doc_id]
+        )
+        conn.execute("COMMIT")
 
     except Exception:
         conn.execute("ROLLBACK")
@@ -180,9 +202,12 @@ def ingest_url(
     """
     from app.ingest.parser import fetch_and_extract_url
 
-    # Derive a stable filename from the URL for duplicate detection (D-07 semantics).
-    # Truncate to 200 chars to stay within any filesystem path limits; replace separators.
-    safe_url_name = url.replace('://', '_').replace('/', '_')[:200] + '.url'
+    # Derive a collision-resistant stable key from the URL for duplicate detection (D-07).
+    # A 16-hex-char SHA-256 prefix gives ~64 bits of collision resistance — far stronger
+    # than the old slash-replacement approach which could map two distinct URLs to the
+    # same filename (WR-02). Fixed length also avoids filesystem path-limit issues.
+    url_hash = hashlib.sha256(url.encode()).hexdigest()[:16]
+    safe_url_name = f"url_{url_hash}.url"
 
     doc_id = str(uuid.uuid4())
     now_iso = datetime.now(timezone.utc).isoformat()
@@ -197,6 +222,8 @@ def ingest_url(
     embeddings = embed_chunks(chunks)
 
     try:
+        if conn.in_transaction:
+            conn.execute("ROLLBACK")
         conn.execute("BEGIN")
 
         # Duplicate replace: if same URL was indexed before, remove it (D-07)
@@ -240,7 +267,8 @@ def ingest_url(
 
     return {
         "doc_id": doc_id,
-        "filename": url,   # return original URL as filename in response (human-readable)
+        "source_url": url,          # original URL for human display
+        "filename": safe_url_name,  # matches what DB stores (WR-05: was returning raw url)
         "chunk_count": len(chunks),
         "status": "ready",
     }
