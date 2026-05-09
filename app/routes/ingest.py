@@ -1,4 +1,5 @@
 import os
+from urllib.parse import urlparse
 from flask import Blueprint, request, jsonify, current_app
 
 from ..auth import require_auth
@@ -7,6 +8,24 @@ from ..services.ingestion import ingest_file, ingest_url
 ingest_bp = Blueprint('ingest', __name__)
 
 MAX_FILE_BYTES = 10 * 1024 * 1024  # 10 MB — enforced before any processing (T-02-08)
+
+
+def _validate_url(url: str) -> None:
+    """Reject non-http(s) schemes and known internal addresses (SSRF prevention).
+
+    Raises ValueError with a human-readable message on disallowed input.
+    Only http and https are permitted — file://, ftp://, and similar schemes
+    that trafilatura's urllib backend may follow are blocked here.
+    """
+    parsed = urlparse(url)
+    if parsed.scheme not in ('http', 'https'):
+        raise ValueError(
+            f"Only http/https URLs are allowed, got scheme: '{parsed.scheme}'"
+        )
+    host = parsed.hostname or ''
+    # Block loopback, link-local (IMDS), and explicitly named internal hosts
+    if host in ('localhost', '127.0.0.1', '::1') or host.startswith('169.254.'):
+        raise ValueError("Requests to internal addresses are not permitted")
 
 
 @ingest_bp.route('/admin/ingest/upload', methods=['POST'])
@@ -63,6 +82,7 @@ def url_ingest():
         return jsonify({"error": "Missing required field: 'url'"}), 400
 
     try:
+        _validate_url(url)
         result = ingest_url(conn, storage_path, url)
         return jsonify(result), 200
     except ValueError as e:
