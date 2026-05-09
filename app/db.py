@@ -7,6 +7,12 @@ def _open_db(db_path: str) -> sqlite3.Connection:
     """Open SQLite connection with WAL mode and 10s busy timeout.
     WAL is persistent (file-level). busy_timeout is per-connection — set on EVERY open.
     """
+    # check_same_thread=False: this deployment uses CGI via Passenger, where each
+    # HTTP request spawns a fresh OS process. There is never more than one thread
+    # sharing this connection, so the sqlite3 thread-safety check is intentionally
+    # disabled. If the deployment model ever changes to a multi-threaded server
+    # (e.g. Gunicorn with threads), this must be replaced with per-request
+    # connections (Flask g) or a threading.Lock-protected pool.
     conn = sqlite3.connect(db_path, check_same_thread=False)
     conn.execute("PRAGMA journal_mode=WAL;")
     conn.execute("PRAGMA busy_timeout=10000;")  # 10 000 ms = 10 seconds
