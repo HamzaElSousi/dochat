@@ -7,22 +7,22 @@
 ## Project Reference
 
 **Core Value:** A visitor asks a question and gets a correct, sourced answer from your actual documents — not a hallucination and not a dead end.
-**Current Focus:** Phase 2 — Document Ingestion Pipeline
+**Current Focus:** Phase 3 — Query Pipeline & RAG Logic
 **Milestone:** v1 — Embeddable RAG chatbot on SiteGround shared hosting
 
 ---
 
 ## Current Position
 
-**Phase:** 2 of 6 — Document Ingestion Pipeline
-**Status:** Phase 2 complete — 4/4 plans executed, 50/50 tests passing, advancing to Phase 3
-**Last session:** 2026-05-09 — Phase 2 fully executed (all 4 plans, 3 waves, 50 tests)
+**Phase:** 3 of 6 — Query Pipeline & RAG Logic
+**Status:** Phase 3 planned — ready to execute (5 plans, 4 waves)
+**Last session:** 2026-05-09 — Phase 3 plans created (03-01 through 03-05; verification passed, 0 blockers)
 
 **Progress:**
 ```
 Phase 1 [##########] 100% ✅
 Phase 2 [##########] 100% ✅ (4/4 plans)
-Phase 3 [          ] 0%
+Phase 3 [##        ] 20% (5/5 plans ready)
 Phase 4 [          ] 0%
 Phase 5 [          ] 0%
 Phase 6 [          ] 0%
@@ -101,7 +101,7 @@ None currently.
 
 **Where we stopped:** Wave 2 of Phase 2 complete. Wave 3 starts with 02-03 (URL ingestion) and 02-04 (service-layer tests) — these can run in parallel.
 
-**Next action:** `/gsd-execute-phase 2` to run plan 02-03 (URL ingestion slice)
+**Next action:** `/gsd-plan-phase 3` to create Phase 3 plans
 
 ---
 

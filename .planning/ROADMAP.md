@@ -74,7 +74,22 @@ Plans:
   3. The LLM answer is demonstrably restricted to indexed context (a question about unindexed topics returns the fallback, not fabricated knowledge)
   4. A multi-turn conversation retains the last 10 turns of history in LLM context; earlier turns are dropped gracefully
   5. When the primary model (`google/gemma-3-27b-it:free`) returns a 429 or error, the system automatically retries with `qwen/qwen3-next-80b-a3b-instruct:free` and the visitor receives an answer
-**Plans:** TBD
+**Plans:** 5 plans
+
+Plans:
+- [ ] 03-01-PLAN.md — DB foundation: sessions table in app/db.py, embed_query() wrapper in embedder.py, chat_bp stub in app/__init__.py
+- [ ] 03-02-PLAN.md — Query service: app/services/query.py with full handle_chat() pipeline (embed → search → gate → LLM retry → session save)
+- [ ] 03-03-PLAN.md — Chat route: full app/routes/chat.py with CORS handling, .env.example Phase 3 vars
+- [ ] 03-04-PLAN.md — MySQL archival cron: scripts/archive_sessions.py standalone script + PyMySQL dependency
+- [ ] 03-05-PLAN.md — Chat endpoint tests: tests/test_chat.py with 10 behavioral test cases
+
+**Wave dependency notes:**
+- **Wave 1** — 03-01 (DB foundation + embed wrapper)
+- **Wave 2** — 03-02 (query service, depends 03-01), 03-04 (archive cron, depends 03-01, parallel with 03-02)
+- **Wave 3** — 03-03 (chat route, depends 03-02)
+- **Wave 4** — 03-05 (tests, depends 03-03 + 03-04)
+
+**Cross-cutting constraints:** Manual `BEGIN`/`COMMIT`/`ROLLBACK` only; all storage via STORAGE_PATH; no torch/transformers; no `with conn:`; serialize_f32 imported from app.services.ingestion (not redefined).
 
 ### Phase 4: Admin UI
 **Goal:** Admin can manage the full document library and review captured leads through a password-protected web interface — without touching the filesystem or command line.
@@ -125,7 +140,7 @@ Plans:
 |-------|----------------|--------|-----------|
 | 1. Infrastructure & Deployment Validation | 2/2 | Complete | 2026-05-09 |
 | 2. Document Ingestion Pipeline | 4/4 | Complete | 2026-05-09 |
-| 3. Query Pipeline & RAG Logic | 0/? | Not started | - |
+| 3. Query Pipeline & RAG Logic | 0/5 | Planned | - |
 | 4. Admin UI | 0/? | Not started | - |
 | 5. Chat Widget | 0/? | Not started | - |
 | 6. Lead Capture | 0/? | Not started | - |
@@ -179,3 +194,4 @@ Plans:
 *Updated: 2026-05-08 — Phase 2 plans created (02-01 through 02-04)*
 *Updated: 2026-05-08 — Phase 2 Plan 01 complete (DB schema + auth foundation); Phase 1 marked complete (2/2 plans)*
 *Updated: 2026-05-09 — Phase 2 Plans 02–04 complete (file ingest + URL ingest + service tests; 50/50 tests pass); Phase 2 marked complete*
+*Updated: 2026-05-09 — Phase 3 plans created (03-01 through 03-05); 5 plans in 4 waves*
