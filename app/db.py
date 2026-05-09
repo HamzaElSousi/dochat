@@ -100,6 +100,30 @@ def init_session_tables(conn: sqlite3.Connection) -> None:
     conn.commit()
 
 
+def init_leads_table(conn: sqlite3.Connection) -> None:
+    """Create leads table if it does not exist.
+
+    Phase 4 creates the schema so the leads view works (empty table — no error).
+    Phase 6 adds the capture route that populates this table.
+
+    id:         UUID string (primary key)
+    name:       lead's name (from Phase 6 capture form)
+    email:      lead's email address
+    question:   the visitor question that triggered the lead capture
+    created_at: ISO-8601 UTC timestamp
+    """
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS leads (
+            id         TEXT PRIMARY KEY,
+            name       TEXT NOT NULL,
+            email      TEXT NOT NULL,
+            question   TEXT NOT NULL,
+            created_at TEXT NOT NULL
+        )
+    """)
+    conn.commit()
+
+
 def init_db(app: flask.Flask) -> None:
     """Initialize sqlite-vec DB. Called once from create_app().
 
@@ -116,6 +140,7 @@ def init_db(app: flask.Flask) -> None:
     mode = _load_sqlite_vec(conn)
     init_document_tables(conn)
     init_session_tables(conn)   # new — D-01
+    init_leads_table(conn)      # Phase 4 — leads schema (populated in Phase 6)
 
     app.config['DB_CONN'] = conn
     app.config['SQLITE_VEC_MODE'] = mode
