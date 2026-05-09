@@ -1,0 +1,26 @@
+# DocChat Admin UI — Phase 4 .htaccess patch
+#
+# Apply to: ~/www/staging.social-automate.com/public_html/.htaccess
+# Location: Add BEFORE the closing </IfModule> of the existing RewriteEngine block,
+#           after the existing /health and /chat rules.
+#
+# All rules use anchored ^dochat/admin patterns (T-04-13: no fallthrough to
+# unintended routes) and the [L] flag. Each rule is path-specific.
+
+    # DocChat Admin UI — Phase 4 routes
+    RewriteRule ^dochat/admin/?$                        /app.cgi/dochat/admin [QSA,L]
+    RewriteRule ^dochat/admin/docs/?$                   /app.cgi/dochat/admin/docs [QSA,L]
+    RewriteRule ^dochat/admin/leads/?$                  /app.cgi/dochat/admin/leads [QSA,L]
+    RewriteRule ^dochat/admin/ingest/upload/?$          /app.cgi/dochat/admin/ingest/upload [QSA,L]
+    RewriteRule ^dochat/admin/ingest/url/?$             /app.cgi/dochat/admin/ingest/url [QSA,L]
+    RewriteRule ^dochat/admin/docs/([^/]+)/?$           /app.cgi/dochat/admin/docs/$1 [QSA,L]
+
+# After applying, restart the app (touch the WSGI entry point):
+#   touch ~/www/staging.social-automate.com/public_html/app.cgi
+#
+# Then verify:
+#   curl -I https://staging.social-automate.com/dochat/admin/docs
+#   (Expected: 401 Unauthorized — Basic Auth prompt)
+#
+#   curl -u admin:<ADMIN_PASSWORD> https://staging.social-automate.com/dochat/admin/docs
+#   (Expected: 200 with HTML containing "Indexed Documents")
