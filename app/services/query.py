@@ -39,7 +39,15 @@ def _call_llm(messages: list[dict], model: str) -> str:
         timeout=LLM_TIMEOUT,
     )
     response.raise_for_status()
-    return response.json()['choices'][0]['message']['content']
+    data = response.json()
+    try:
+        content = data['choices'][0]['message']['content']
+    except (KeyError, IndexError, TypeError):
+        # OpenRouter returns 200 with no choices on content-filter refusals / overload
+        raise requests.RequestException(f"Malformed LLM response: {data!r}")
+    if content is None:
+        raise requests.RequestException("LLM returned null content")
+    return content
 
 
 def _call_llm_with_retry(messages: list[dict]) -> str | None:
