@@ -15,6 +15,16 @@ def require_auth(f):
     @functools.wraps(f)
     def decorated(*args, **kwargs):
         admin_password = os.environ.get('ADMIN_PASSWORD', '')
+        if not admin_password:
+            # Fail closed — never allow access when ADMIN_PASSWORD is unconfigured.
+            # An empty password would allow any Basic-auth header with an empty
+            # password field to pass the check below, silently opening every admin
+            # endpoint to unauthenticated access.
+            return Response(
+                'Server misconfiguration: ADMIN_PASSWORD is not set',
+                500,
+                {'WWW-Authenticate': 'Basic realm="DocChat Admin"'}
+            )
         auth = request.authorization
         if not auth or auth.password != admin_password:
             return Response(
