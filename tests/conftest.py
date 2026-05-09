@@ -1,7 +1,7 @@
 import os
 import pytest
 
-@pytest.fixture
+@pytest.fixture(scope="function")  # WR-06: explicit scope — must stay function to isolate DB per test
 def app(tmp_path, monkeypatch):
     """Flask test app with isolated storage and injected env vars.
     Does NOT require a real .env file — injects required env vars directly.
