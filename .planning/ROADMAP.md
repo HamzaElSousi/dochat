@@ -97,13 +97,26 @@ Plans:
 **Depends on:** Phase 2, Phase 3
 **Requirements:** ADMIN-01, ADMIN-02, ADMIN-03, ADMIN-04, ADMIN-05, ADMIN-06
 **Success Criteria** (what must be TRUE):
-  1. Accessing any `/admin/*` route without credentials returns a 401 prompt; valid credentials from `.env` grant access
+  1. Accessing any `/dochat/admin/*` route without credentials returns a 401 prompt; valid credentials from `.env` grant access
   2. Admin drags and drops a PDF onto the upload area and the document appears in the document list with filename, type, upload date, status, and chunk count
   3. Admin submits a URL via text input and the crawled page appears in the document list
   4. Admin deletes a document — it disappears from the list, its file is removed from disk, and its chunks are gone from the vector index
   5. Admin views the leads table showing name, email, question asked, and timestamp for every captured lead
-**Plans:** TBD
-**UI hint**: yes
+**Plans:** 4 plans
+
+Plans:
+- [ ] 04-01-PLAN.md — DB foundation: leads table DDL in app/db.py, admin_bp + admin_api_bp blueprint stubs registered in app factory
+- [ ] 04-02-PLAN.md — Admin page routes (GET /dochat/admin/*) + all Jinja2 templates + static/admin.js (8 JS functions)
+- [ ] 04-03-PLAN.md — Admin API routes: POST /dochat/admin/ingest/upload, POST /dochat/admin/ingest/url, DELETE /dochat/admin/docs/<doc_id>
+- [ ] 04-04-PLAN.md — Admin test suite (tests/test_admin.py) + .htaccess rewrite rules for staging server
+
+**Wave dependency notes:**
+- **Wave 1** — 04-01 (DB schema + blueprint stubs)
+- **Wave 2** *(blocked on Wave 1)* — 04-02 (page routes + templates + JS)
+- **Wave 3** *(blocked on Wave 1 + 04-02)* — 04-03 (API routes)
+- **Wave 4** *(blocked on Wave 2 + Wave 3)* — 04-04 (tests + .htaccess, has human checkpoint)
+
+**Cross-cutting constraints:** Route prefix `/dochat/admin` (not `/admin`); `@require_auth` on all admin handlers; `current_app.config['DB_CONN']` for all DB access; manual `BEGIN`/`COMMIT`/`ROLLBACK` only; no `with conn:`; no torch/transformers.
 
 ### Phase 5: Chat Widget
 **Goal:** A visitor on any website can open the chat widget, ask a question, and receive an answer — with the widget isolated from host-site CSS and branded to match the site.
@@ -141,7 +154,7 @@ Plans:
 | 1. Infrastructure & Deployment Validation | 2/2 | Complete | 2026-05-09 |
 | 2. Document Ingestion Pipeline | 4/4 | Complete | 2026-05-09 |
 | 3. Query Pipeline & RAG Logic | 5/5 | Complete | 2026-05-09 |
-| 4. Admin UI | 0/? | Not started | - |
+| 4. Admin UI | 0/4 | In progress | - |
 | 5. Chat Widget | 0/? | Not started | - |
 | 6. Lead Capture | 0/? | Not started | - |
 
@@ -197,3 +210,4 @@ Plans:
 *Updated: 2026-05-09 — Phase 3 plans created (03-01 through 03-05); 5 plans in 4 waves*
 *Updated: 2026-05-09 — Phase 3 Plan 01 complete (sessions table, embed_query wrapper, chat_bp stub; 50/50 tests pass)*
 *Updated: 2026-05-09 — Phase 3 complete (5/5 plans; handle_chat RAG pipeline, /chat route, CORS, archive cron, 62/62 tests pass)*
+*Updated: 2026-05-09 — Phase 4 plans created (04-01 through 04-04); 4 plans in 4 waves*

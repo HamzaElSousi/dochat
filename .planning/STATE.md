@@ -14,16 +14,16 @@
 
 ## Current Position
 
-**Phase:** 4 of 6 — Admin UI (next)
-**Status:** Phase 3 complete — 5/5 plans done; ready for Phase 4
-**Last session:** 2026-05-09 — Phase 3 fully executed (handle_chat RAG pipeline, /chat route, CORS, archive cron, 62/62 tests pass; verification 19/19 passed)
+**Phase:** 4 of 6 — Admin UI (ready to execute)
+**Status:** Phase 4 planned — 4/4 plans created; ready to execute
+**Last session:** 2026-05-09 — Phase 4 planned (Admin UI: leads DDL + blueprint stubs, page routes + templates + admin.js, API endpoints, tests + .htaccess; 4 plans in 4 waves)
 
 **Progress:**
 ```
 Phase 1 [##########] 100% ✅
 Phase 2 [##########] 100% ✅ (4/4 plans)
 Phase 3 [##########] 100% ✅ (5/5 plans)
-Phase 4 [          ] 0%
+Phase 4 [▓▓        ] 20% (planned — 4 plans ready)
 Phase 5 [          ] 0%
 Phase 6 [          ] 0%
 
@@ -106,9 +106,9 @@ None currently.
 
 **What happened:** Phase 3 fully executed (5/5 plans, 4 waves). Built: sessions table DDL + `embed_query()` wrapper (Plan 01), `handle_chat()` RAG pipeline with primary→fallback LLM retry + session persistence (Plan 02), full `POST /chat` HTTP endpoint with CORS (Plan 03), standalone `archive_sessions.py` cron script + PyMySQL (Plan 04), 12-test suite for all QUERY requirements (Plan 05). Verification: 19/19 must-haves passed. Code review: 1 critical (CR-01 malformed LLM response) fixed inline. 62/62 tests passing.
 
-**Where we stopped:** Phase 3 complete. Phase 4 (Admin UI) is next.
+**Where we stopped:** Phase 4 context gathered. Key decisions: route prefix `/dochat/admin`, HTTP Basic Auth (keep stub), multi-route nav (`/dochat/admin/docs` + `/dochat/admin/leads`), Pico.css CDN, XHR fetch + spinner for uploads.
 
-**Next action:** `/gsd-discuss-phase 4` or `/gsd-plan-phase 4`
+**Next action:** `/gsd-plan-phase 4`
 
 ---
 
@@ -122,4 +122,4 @@ None currently.
 
 ---
 *STATE initialized: 2026-05-07*
-*Last updated: 2026-05-09 after Phase 3 completion*
+*Last updated: 2026-05-09 after Phase 4 context session*
