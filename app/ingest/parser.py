@@ -37,6 +37,8 @@ def parse_pdf(file_bytes: bytes) -> str:
         raise ValueError("PDF is password-protected — remove password before uploading")
     except PDFSyntaxError:
         raise ValueError("PDF appears to be corrupt or is not a valid PDF file")
+    except MemoryError:
+        raise  # do not wrap resource exhaustion as a client-facing ValueError
     except Exception as e:
         raise ValueError(f"PDF parsing failed: {e}")
 
@@ -54,6 +56,8 @@ def parse_docx(file_bytes: bytes) -> str:
         doc = Document(io.BytesIO(file_bytes))
     except zipfile.BadZipFile:
         raise ValueError("DOCX file is corrupt or not a valid Word document")
+    except MemoryError:
+        raise  # do not wrap resource exhaustion as a client-facing ValueError
     except Exception as e:
         raise ValueError(f"DOCX parsing failed: {e}")
 
