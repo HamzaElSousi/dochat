@@ -15,19 +15,19 @@
 ## Current Position
 
 **Phase:** 3 of 6 — Query Pipeline & RAG Logic
-**Status:** Phase 3 planned — ready to execute (5 plans, 4 waves)
-**Last session:** 2026-05-09 — Phase 3 plans created (03-01 through 03-05; verification passed, 0 blockers)
+**Status:** Phase 3 in progress — Plan 01 complete (1/5 plans done)
+**Last session:** 2026-05-09 — Phase 3 Plan 01 executed (sessions table, embed_query wrapper, chat_bp stub; 50/50 tests pass)
 
 **Progress:**
 ```
 Phase 1 [##########] 100% ✅
 Phase 2 [##########] 100% ✅ (4/4 plans)
-Phase 3 [##        ] 20% (5/5 plans ready)
+Phase 3 [##        ] 20% (1/5 plans done)
 Phase 4 [          ] 0%
 Phase 5 [          ] 0%
 Phase 6 [          ] 0%
 
-Overall [####      ] 29%
+Overall [####      ] 31%
 ```
 
 ---
@@ -37,7 +37,7 @@ Overall [####      ] 29%
 | Metric | Value |
 |--------|-------|
 | Phases complete | 1 / 6 |
-| Plans complete | 2 / 4 (Phase 2) |
+| Plans complete | 1 / 5 (Phase 3) |
 | Requirements mapped | 34 / 34 |
 | Requirements done | 10 / 34 (INFRA-01..04 done; INGEST-01,02,03,05,06,07 done; INGEST-04 URL in progress) |
 | Last session | 2026-05-09 |
@@ -64,6 +64,9 @@ Overall [####      ] 29%
 | require_auth checks only password, not username | Username ignored; Phase 4 will add full auth (rate limiting, session tokens) | Phase 2 |
 | chunk_size=511 not 512 in from_tiktoken_encoder | LangChain off-by-one produces 513-token chunks at 512; 511 keeps all chunks at <=512 tokens | Phase 2 |
 | ingest_file() fetches existing filepath BEFORE _delete_document() | DELETE removes the row so re-fetch is impossible after; filepath needed to remove orphaned file | Phase 2 |
+| sessions table uses manual conn.commit() (not context manager) | Consistent with init_document_tables() idiom — avoids sqlite3 context manager + BEGIN conflict | Phase 3 |
+| chat_bp stub created in Plan 01 before Plan 03 route file exists | Allows app factory to import cleanly and existing tests to pass; Plan 03 replaces stub | Phase 3 |
+| embed_query() delegates to embed_chunks([text])[0] | Thin wrapper reuses all existing error handling; zero new dependencies | Phase 3 |
 
 ### Resolved Questions (from Phase 1)
 
@@ -95,13 +98,13 @@ None currently.
 
 ## Session Continuity
 
-### Last Session (2026-05-08)
+### Last Session (2026-05-09)
 
-**What happened:** Plan 02-02 executed. File ingestion vertical slice complete: app/ingest/ (parser, chunker, embedder), app/services/ingestion.py (atomic rollback service), app/routes/ingest.py (upload endpoint). 13 new tests added; all 30 project tests pass.
+**What happened:** Phase 3 Plan 01 executed. Sessions table DDL added to app/db.py, embed_query() wrapper added to app/ingest/embedder.py, chat_bp stub wired into app/__init__.py. All 50 existing tests still pass. Zero deviations from plan.
 
-**Where we stopped:** Wave 2 of Phase 2 complete. Wave 3 starts with 02-03 (URL ingestion) and 02-04 (service-layer tests) — these can run in parallel.
+**Where we stopped:** Phase 3 Wave 1 complete. Wave 2 starts with 03-02 (query service) and 03-04 (archive cron) — these can run in parallel.
 
-**Next action:** `/gsd-plan-phase 3` to create Phase 3 plans
+**Next action:** `/gsd-execute-phase 3` for Plan 02 (query service)
 
 ---
 

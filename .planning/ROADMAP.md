@@ -77,7 +77,7 @@ Plans:
 **Plans:** 5 plans
 
 Plans:
-- [ ] 03-01-PLAN.md — DB foundation: sessions table in app/db.py, embed_query() wrapper in embedder.py, chat_bp stub in app/__init__.py
+- [x] 03-01-PLAN.md — DB foundation: sessions table in app/db.py, embed_query() wrapper in embedder.py, chat_bp stub in app/__init__.py
 - [ ] 03-02-PLAN.md — Query service: app/services/query.py with full handle_chat() pipeline (embed → search → gate → LLM retry → session save)
 - [ ] 03-03-PLAN.md — Chat route: full app/routes/chat.py with CORS handling, .env.example Phase 3 vars
 - [ ] 03-04-PLAN.md — MySQL archival cron: scripts/archive_sessions.py standalone script + PyMySQL dependency
@@ -140,7 +140,7 @@ Plans:
 |-------|----------------|--------|-----------|
 | 1. Infrastructure & Deployment Validation | 2/2 | Complete | 2026-05-09 |
 | 2. Document Ingestion Pipeline | 4/4 | Complete | 2026-05-09 |
-| 3. Query Pipeline & RAG Logic | 0/5 | Planned | - |
+| 3. Query Pipeline & RAG Logic | 1/5 | In Progress | - |
 | 4. Admin UI | 0/? | Not started | - |
 | 5. Chat Widget | 0/? | Not started | - |
 | 6. Lead Capture | 0/? | Not started | - |
@@ -195,3 +195,4 @@ Plans:
 *Updated: 2026-05-08 — Phase 2 Plan 01 complete (DB schema + auth foundation); Phase 1 marked complete (2/2 plans)*
 *Updated: 2026-05-09 — Phase 2 Plans 02–04 complete (file ingest + URL ingest + service tests; 50/50 tests pass); Phase 2 marked complete*
 *Updated: 2026-05-09 — Phase 3 plans created (03-01 through 03-05); 5 plans in 4 waves*
+*Updated: 2026-05-09 — Phase 3 Plan 01 complete (sessions table, embed_query wrapper, chat_bp stub; 50/50 tests pass)*
