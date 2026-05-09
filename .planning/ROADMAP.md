@@ -11,7 +11,7 @@
 ## Phases
 
 - [ ] **Phase 1: Infrastructure & Deployment Validation** — Confirm SiteGround compatibility (Passenger WSGI, sqlite-vec, RAM, SQLite version) before writing any application logic
-- [ ] **Phase 2: Document Ingestion Pipeline** — Admin can upload PDF/DOCX/TXT/MD files and submit URLs; system parses, chunks, embeds, and indexes all content
+- [x] **Phase 2: Document Ingestion Pipeline** — Admin can upload PDF/DOCX/TXT/MD files and submit URLs; system parses, chunks, embeds, and indexes all content *(completed 2026-05-09)*
 - [ ] **Phase 3: Query Pipeline & RAG Logic** — Visitor messages are embedded, searched, gated by similarity threshold, and answered by LLM with session history
 - [ ] **Phase 4: Admin UI** — Password-protected web UI for document management, URL submission, and lead review
 - [ ] **Phase 5: Chat Widget** — Embeddable vanilla JS widget with Shadow DOM isolation, theming, and full UX polish
@@ -51,10 +51,10 @@ Plans:
 **Plans:** 4 plans
 
 Plans:
-- [ ] 02-01-PLAN.md — DB schema (4 tables incl. vec_items cosine), auth stub decorator, 6 new pip dependencies
-- [ ] 02-02-PLAN.md — File ingestion slice: parser/chunker/embedder utilities + ingestion service (atomic rollback) + upload route + upload tests
-- [ ] 02-03-PLAN.md — URL ingestion slice: fetch_and_extract_url + /admin/ingest/url route + URL tests
-- [ ] 02-04-PLAN.md — Service-layer correctness tests: rollback, chunking, batching, duplicate-replace
+- [x] 02-01-PLAN.md — DB schema (4 tables incl. vec_items cosine), auth stub decorator, 6 new pip dependencies
+- [x] 02-02-PLAN.md — File ingestion slice: parser/chunker/embedder utilities + ingestion service (atomic rollback) + upload route + upload tests
+- [x] 02-03-PLAN.md — URL ingestion slice: fetch_and_extract_url + /admin/ingest/url route + URL tests
+- [x] 02-04-PLAN.md — Service-layer correctness tests: rollback, chunking, batching, duplicate-replace
 
 **Wave dependency notes:**
 - **Wave 1** — 02-01 (DB schema + auth stub)
@@ -124,7 +124,7 @@ Plans:
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Infrastructure & Deployment Validation | 2/2 | Complete | 2026-05-09 |
-| 2. Document Ingestion Pipeline | 2/4 | In Progress | - |
+| 2. Document Ingestion Pipeline | 4/4 | Complete | 2026-05-09 |
 | 3. Query Pipeline & RAG Logic | 0/? | Not started | - |
 | 4. Admin UI | 0/? | Not started | - |
 | 5. Chat Widget | 0/? | Not started | - |
@@ -178,4 +178,4 @@ Plans:
 *Last updated: 2026-05-08 — Phase 1 plans created (01-01-PLAN.md, 01-02-PLAN.md)*
 *Updated: 2026-05-08 — Phase 2 plans created (02-01 through 02-04)*
 *Updated: 2026-05-08 — Phase 2 Plan 01 complete (DB schema + auth foundation); Phase 1 marked complete (2/2 plans)*
-*Updated: 2026-05-09 — Phase 2 Plan 02 complete (file ingestion slice: parser/chunker/embedder + service + upload route; 30/30 tests pass)*
+*Updated: 2026-05-09 — Phase 2 Plans 02–04 complete (file ingest + URL ingest + service tests; 50/50 tests pass); Phase 2 marked complete*
