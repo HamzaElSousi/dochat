@@ -1,4 +1,4 @@
-#!/home/u2390-hy0r91sgrvrg/dochat/venv/bin/python3
+#!/home/customer/dochat/venv/bin/python3
 import sys, os
 
 DOCHAT_DIR = os.path.expanduser('~/dochat')
