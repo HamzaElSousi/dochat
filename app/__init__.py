@@ -9,7 +9,11 @@ from .routes.admin_api import admin_api_bp
 
 
 def create_app():
-    app = Flask(__name__)
+    import os as _os
+    _root = _os.path.dirname(_os.path.dirname(_os.path.abspath(__file__)))
+    app = Flask(__name__,
+                template_folder=_os.path.join(_root, 'templates'),
+                static_folder=_os.path.join(_root, 'static'))
 
     app.config['SECRET_KEY'] = os.environ['SECRET_KEY']
     # os.path.expanduser is required — Python does not auto-expand ~ in strings.
