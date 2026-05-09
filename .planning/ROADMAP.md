@@ -124,7 +124,7 @@ Plans:
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Infrastructure & Deployment Validation | 2/2 | Complete | 2026-05-09 |
-| 2. Document Ingestion Pipeline | 1/4 | In Progress | - |
+| 2. Document Ingestion Pipeline | 2/4 | In Progress | - |
 | 3. Query Pipeline & RAG Logic | 0/? | Not started | - |
 | 4. Admin UI | 0/? | Not started | - |
 | 5. Chat Widget | 0/? | Not started | - |
@@ -178,3 +178,4 @@ Plans:
 *Last updated: 2026-05-08 — Phase 1 plans created (01-01-PLAN.md, 01-02-PLAN.md)*
 *Updated: 2026-05-08 — Phase 2 plans created (02-01 through 02-04)*
 *Updated: 2026-05-08 — Phase 2 Plan 01 complete (DB schema + auth foundation); Phase 1 marked complete (2/2 plans)*
+*Updated: 2026-05-09 — Phase 2 Plan 02 complete (file ingestion slice: parser/chunker/embedder + service + upload route; 30/30 tests pass)*

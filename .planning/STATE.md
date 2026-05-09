@@ -15,19 +15,19 @@
 ## Current Position
 
 **Phase:** 2 of 6 — Document Ingestion Pipeline
-**Status:** Executing — Wave 1 complete, Wave 2 ready (02-02 next)
-**Last session:** 2026-05-08 — Plan 02-01 complete (DB schema + auth foundation)
+**Status:** Executing — Wave 2 complete, Wave 3 ready (02-03 and 02-04 next, parallel)
+**Last session:** 2026-05-09 — Plan 02-02 complete (file ingestion slice: parser/chunker/embedder + service + upload route)
 
 **Progress:**
 ```
 Phase 1 [##########] 100% ✅
-Phase 2 [##        ] 25% (1/4 plans)
+Phase 2 [####      ] 50% (2/4 plans)
 Phase 3 [          ] 0%
 Phase 4 [          ] 0%
 Phase 5 [          ] 0%
 Phase 6 [          ] 0%
 
-Overall [###       ] 21%
+Overall [####      ] 29%
 ```
 
 ---
@@ -37,10 +37,10 @@ Overall [###       ] 21%
 | Metric | Value |
 |--------|-------|
 | Phases complete | 1 / 6 |
-| Plans complete | 1 / 4 (Phase 2) |
+| Plans complete | 2 / 4 (Phase 2) |
 | Requirements mapped | 34 / 34 |
-| Requirements done | 4 / 34 (INFRA-01 through INFRA-04; INGEST-01..07 in progress) |
-| Last session | 2026-05-08 |
+| Requirements done | 10 / 34 (INFRA-01..04 done; INGEST-01,02,03,05,06,07 done; INGEST-04 URL in progress) |
+| Last session | 2026-05-09 |
 
 ---
 
@@ -62,6 +62,8 @@ Overall [###       ] 21%
 | vec_items uses distance_metric=cosine | Phase 3 similarity threshold ~0.35 is calibrated for cosine; omitting defaults to L2 breaking Phase 3 silently | Phase 2 |
 | Manual conn.commit() in init_document_tables() | Avoids sqlite3 context manager + BEGIN conflict (RESEARCH.md Pitfall 6) | Phase 2 |
 | require_auth checks only password, not username | Username ignored; Phase 4 will add full auth (rate limiting, session tokens) | Phase 2 |
+| chunk_size=511 not 512 in from_tiktoken_encoder | LangChain off-by-one produces 513-token chunks at 512; 511 keeps all chunks at <=512 tokens | Phase 2 |
+| ingest_file() fetches existing filepath BEFORE _delete_document() | DELETE removes the row so re-fetch is impossible after; filepath needed to remove orphaned file | Phase 2 |
 
 ### Resolved Questions (from Phase 1)
 
@@ -95,11 +97,11 @@ None currently.
 
 ### Last Session (2026-05-08)
 
-**What happened:** Plan 02-01 executed. DB schema foundation complete: documents, chunks, vec_items (cosine), chunk_embeddings tables created. app/auth.py with require_auth decorator created. 6 new pip deps added to requirements.txt. All 17 existing tests still pass.
+**What happened:** Plan 02-02 executed. File ingestion vertical slice complete: app/ingest/ (parser, chunker, embedder), app/services/ingestion.py (atomic rollback service), app/routes/ingest.py (upload endpoint). 13 new tests added; all 30 project tests pass.
 
-**Where we stopped:** Wave 1 of Phase 2 complete. Wave 2 starts with 02-02 (file ingestion slice).
+**Where we stopped:** Wave 2 of Phase 2 complete. Wave 3 starts with 02-03 (URL ingestion) and 02-04 (service-layer tests) — these can run in parallel.
 
-**Next action:** `/gsd-execute-phase 2` to run plan 02-02
+**Next action:** `/gsd-execute-phase 2` to run plan 02-03 (URL ingestion slice)
 
 ---
 
