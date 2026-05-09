@@ -42,6 +42,12 @@ def embed_chunks(chunk_texts: list[str]) -> list[list[float]]:
         data = response.json()
         # Sort by index to ensure ordering matches input order
         batch_embeddings = sorted(data["data"], key=lambda x: x["index"])
-        all_embeddings.extend(e["embedding"] for e in batch_embeddings)
+        for e in batch_embeddings:
+            if len(e["embedding"]) != EMBED_DIM:
+                raise ValueError(
+                    f"API returned embedding dimension {len(e['embedding'])}, "
+                    f"expected {EMBED_DIM}. Check EMBED_MODEL or API response."
+                )
+            all_embeddings.append(e["embedding"])
 
     return all_embeddings
