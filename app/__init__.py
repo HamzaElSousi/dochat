@@ -4,6 +4,8 @@ from .db import init_db
 from .routes.health import health_bp
 from .routes.ingest import ingest_bp
 from .routes.chat import chat_bp          # new — Plan 03 creates this file
+from .routes.admin import admin_bp
+from .routes.admin_api import admin_api_bp
 
 
 def create_app():
@@ -18,5 +20,7 @@ def create_app():
     app.register_blueprint(health_bp)
     app.register_blueprint(ingest_bp)
     app.register_blueprint(chat_bp)       # new — D-04
+    app.register_blueprint(admin_bp)
+    app.register_blueprint(admin_api_bp)
 
     return app
