@@ -139,3 +139,37 @@ def admin_delete_doc(doc_id):
             pass  # Orphaned file is acceptable — DB state is authoritative
 
     return jsonify({"deleted": True, "doc_id": doc_id}), 200
+
+
+@admin_api_bp.route('/dochat/admin/settings', methods=['POST'])
+@require_auth
+def admin_settings_save():
+    """Save settings to the settings table.
+
+    POST body: JSON {"book_call_url": "https://..."} or form data.
+    Returns: {"saved": true, "book_call_url": "..."}
+    Protected by @require_auth (D-11).
+    """
+    conn = current_app.config.get('DB_CONN')
+
+    # Accept both JSON and form submissions
+    if request.is_json:
+        data = request.get_json(silent=True) or {}
+        book_call_url = data.get('book_call_url', '').strip()
+    else:
+        book_call_url = (request.form.get('book_call_url') or '').strip()
+
+    try:
+        if conn.in_transaction:
+            conn.execute("ROLLBACK")
+        conn.execute("BEGIN")
+        conn.execute(
+            "INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)",
+            ['book_call_url', book_call_url]
+        )
+        conn.execute("COMMIT")
+    except Exception:
+        conn.execute("ROLLBACK")
+        return jsonify({"error": "Failed to save settings"}), 500
+
+    return jsonify({"saved": True, "book_call_url": book_call_url}), 200

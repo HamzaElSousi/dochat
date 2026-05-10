@@ -80,3 +80,19 @@ def admin_leads():
         })
 
     return render_template('admin/leads.html', leads=leads)
+
+
+@admin_bp.route('/dochat/admin/settings')
+@require_auth
+def admin_settings():
+    """Admin settings page — renders the book-call URL configuration form.
+
+    GET /dochat/admin/settings — protected by @require_auth (D-11).
+    Fetches current book_call_url from settings table (empty string if not set).
+    """
+    conn = current_app.config.get('DB_CONN')
+    row = conn.execute(
+        "SELECT value FROM settings WHERE key = ?", ['book_call_url']
+    ).fetchone()
+    book_call_url = row[0] if row else ''
+    return render_template('admin/settings.html', book_call_url=book_call_url, active_page='settings')
