@@ -14,9 +14,9 @@
 
 ## Current Position
 
-**Phase:** 5 of 6 — Chat Widget (planned — 3 plans ready)
-**Status:** Phase 5 planned — 3/3 plans created; ready to execute
-**Last session:** 2026-05-09 — Phase 5 planned (backend chips, widget JS, delivery+integration)
+**Phase:** 5 of 6 — Chat Widget (executing — 3/3 plans complete pending human checkpoint)
+**Status:** Phase 5 Plan 03 complete (automated tasks); awaiting human checkpoint verification for full phase sign-off
+**Last session:** 2026-05-10 — Phase 5 Plan 03: Flask /dochat/widget.js route, .htaccess patch, 5 delivery tests (95 pass)
 
 **Progress:**
 ```
@@ -24,10 +24,10 @@ Phase 1 [##########] 100% ✅
 Phase 2 [##########] 100% ✅ (4/4 plans)
 Phase 3 [##########] 100% ✅ (5/5 plans)
 Phase 4 [▓▓        ] 20% (planned — 4 plans ready)
-Phase 5 [▓▓        ] 20% (planned — 3 plans ready)
+Phase 5 [########  ] 80% (3/3 plans automated complete; checkpoint pending)
 Phase 6 [          ] 0%
 
-Overall [#######   ] 58%
+Overall [########  ] 70%
 ```
 
 ---
@@ -50,6 +50,9 @@ Overall [#######   ] 58%
 
 | Decision | Rationale | Phase |
 |----------|-----------|-------|
+| widget_js() route in create_app() (not Blueprint) | Single static-file route — no extra module/file needed; Blueprint overhead unwarranted | Phase 5 |
+| send_from_directory resolves app/static/ via __file__ | app/__init__.py static_folder points to root static/ (different dir); explicit path required | Phase 5 |
+| .htaccess rule uses anchored pattern with escaped dot | Matches Phase 4 format; ^dochat/widget\.js$ prevents wildcard traversal (T-05-10) | Phase 5 |
 | Flask over FastAPI | FastAPI is ASGI — incompatible with Passenger WSGI on SiteGround | Research |
 | sqlite-vec over ChromaDB | Single-file SQLite backend; ChromaDB's HNSW index needs too much RAM | Research |
 | OpenRouter embeddings API | PyTorch/sentence-transformers would OOM-kill on shared hosting | Research |
@@ -102,13 +105,13 @@ None currently.
 
 ## Session Continuity
 
-### Last Session (2026-05-09)
+### Last Session (2026-05-10)
 
-**What happened:** Phase 3 fully executed (5/5 plans, 4 waves). Built: sessions table DDL + `embed_query()` wrapper (Plan 01), `handle_chat()` RAG pipeline with primary→fallback LLM retry + session persistence (Plan 02), full `POST /chat` HTTP endpoint with CORS (Plan 03), standalone `archive_sessions.py` cron script + PyMySQL (Plan 04), 12-test suite for all QUERY requirements (Plan 05). Verification: 19/19 must-haves passed. Code review: 1 critical (CR-01 malformed LLM response) fixed inline. 62/62 tests passing.
+**What happened:** Phase 5 Plans 01–03 fully executed. Built: `_parse_chips()` + chip prompt in `query.py` (Plan 01), 575-line Shadow DOM `widget.js` (Plan 02), Flask `/dochat/widget.js` route + `.htaccess` patch + 5 delivery tests (Plan 03). 95/95 tests passing.
 
-**Where we stopped:** Phase 4 context gathered. Key decisions: route prefix `/dochat/admin`, HTTP Basic Auth (keep stub), multi-route nav (`/dochat/admin/docs` + `/dochat/admin/leads`), Pico.css CDN, XHR fetch + spinner for uploads.
+**Where we stopped:** Plan 03 human checkpoint — awaiting visual verification of widget embed in browser.
 
-**Next action:** `/gsd-plan-phase 4`
+**Next action:** User verifies FAB renders on bare HTML page and approves the checkpoint; then `/gsd-execute-phase 5` continuation or `/gsd-transition 5`
 
 ---
 
