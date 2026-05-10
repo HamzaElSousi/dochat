@@ -1,13 +1,34 @@
 import os
+import uuid
+from datetime import datetime, timezone
 from flask import Blueprint, request, jsonify, current_app
 
 from ..auth import require_auth
 from ..services.ingestion import ingest_file, ingest_url, _delete_document
 from ..routes.ingest import _validate_url
+from ..services.email import send_lead_notification
 
 admin_api_bp = Blueprint('admin_api', __name__)
 
 MAX_FILE_BYTES = 10 * 1024 * 1024  # 10 MB (matches ingest.py T-02-08)
+
+# CORS allowlist for public widget endpoints — same pattern as chat.py (D-01)
+_ALLOWED_ORIGINS: list[str] = [
+    o.strip()
+    for o in os.environ.get('ALLOWED_ORIGINS', '').split(',')
+    if o.strip()
+]
+
+
+def _cors_headers_leads(origin: str) -> dict:
+    """CORS headers for public widget endpoints (/api/leads, /api/settings)."""
+    if origin in _ALLOWED_ORIGINS:
+        return {
+            'Access-Control-Allow-Origin': origin,
+            'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
+            'Access-Control-Allow-Headers': 'Content-Type',
+        }
+    return {}
 
 
 @admin_api_bp.route('/dochat/admin/ingest/upload', methods=['POST'])
@@ -173,3 +194,84 @@ def admin_settings_save():
         return jsonify({"error": "Failed to save settings"}), 500
 
     return jsonify({"saved": True, "book_call_url": book_call_url}), 200
+
+
+@admin_api_bp.route('/dochat/api/leads', methods=['POST', 'OPTIONS'])
+def public_leads():
+    """Public lead capture endpoint — no auth (widget-facing).
+
+    POST body: {"name": "...", "email": "...", "phone": "...", "question": "..."}
+    Response: {"saved": true, "id": "<uuid>"}
+    Saves lead to DB then sends SMTP email (D-06). Email failure non-fatal (D-08).
+    CORS: same ALLOWED_ORIGINS allowlist as /chat (D-01).
+    Input lengths bounded: name<=200, email<=254, phone<=30, question<=2000 (T-06-07).
+    """
+    origin = request.headers.get('Origin', '')
+    cors = _cors_headers_leads(origin)
+
+    if request.method == 'OPTIONS':
+        return ('', 204, cors)
+
+    conn = current_app.config.get('DB_CONN')
+    data = request.get_json(silent=True) or {}
+
+    name     = (data.get('name') or '').strip()[:200]
+    email    = (data.get('email') or '').strip()[:254]
+    phone    = (data.get('phone') or '').strip()[:30]
+    question = (data.get('question') or '').strip()[:2000]
+
+    # Re-check required fields after stripping (slice does not introduce empty from valid input)
+    if not (data.get('name') or '').strip() or not (data.get('email') or '').strip():
+        resp = jsonify({"error": "Missing required fields: name and email"})
+        resp.headers.update(cors)
+        return resp, 400
+
+    lead_id   = str(uuid.uuid4())
+    timestamp = datetime.now(timezone.utc).isoformat()
+
+    try:
+        if conn.in_transaction:
+            conn.execute("ROLLBACK")
+        conn.execute("BEGIN")
+        conn.execute(
+            "INSERT INTO leads (id, name, email, phone, question, created_at) "
+            "VALUES (?, ?, ?, ?, ?, ?)",
+            [lead_id, name, email, phone, question, timestamp]
+        )
+        conn.execute("COMMIT")
+    except Exception:
+        conn.execute("ROLLBACK")
+        resp = jsonify({"error": "Failed to save lead"})
+        resp.headers.update(cors)
+        return resp, 500
+
+    # Send email notification — failure is non-fatal (D-08)
+    send_lead_notification(name, email, phone, question, timestamp)
+
+    resp = jsonify({"saved": True, "id": lead_id})
+    resp.headers.update(cors)
+    return resp, 200
+
+
+@admin_api_bp.route('/dochat/api/settings', methods=['GET', 'OPTIONS'])
+def public_settings():
+    """Public settings endpoint — no auth (widget-facing).
+
+    Returns: {"book_call_url": "..."} — empty string if not configured.
+    Widget fetches this once on init to get the CTA URL (D-12).
+    """
+    origin = request.headers.get('Origin', '')
+    cors = _cors_headers_leads(origin)
+
+    if request.method == 'OPTIONS':
+        return ('', 204, cors)
+
+    conn = current_app.config.get('DB_CONN')
+    row = conn.execute(
+        "SELECT value FROM settings WHERE key = ?", ['book_call_url']
+    ).fetchone()
+    book_call_url = row[0] if row else ''
+
+    resp = jsonify({"book_call_url": book_call_url})
+    resp.headers.update(cors)
+    return resp, 200
