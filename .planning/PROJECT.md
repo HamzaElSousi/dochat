@@ -18,19 +18,18 @@ A visitor asks a question and gets a correct, sourced answer from your actual do
 - [x] LLM answers are generated via OpenRouter API (Phase 3 — primary google/gemma-3-27b-it:free, fallback qwen/qwen3-next-80b-a3b-instruct:free)
 - [x] Admin can upload PDFs, Word docs, plain text, and markdown files via web UI (Phase 2 — ingest pipeline complete)
 - [x] Admin can add web pages/URLs for the system to crawl and index (Phase 2 — trafilatura URL crawl)
+- [x] Admin can remove documents from the library (Phase 4 — DELETE /dochat/admin/docs/<id> with file + vector cleanup)
+- [x] Admin UI is password-protected (Phase 4 — HTTP Basic Auth via ADMIN_PASSWORD env var)
+- [x] Admin can upload PDFs, Word docs, plain text, and markdown files via web UI (Phase 4 — drag-drop + URL form at /dochat/admin/docs)
 
 ### Active
 
 - [ ] Visitor can ask questions via a branded chat widget embedded on any webpage
-- [ ] System answers questions using content retrieved from the document library
-- [ ] Admin can upload PDFs, Word docs, plain text, and markdown files via web UI
-- [ ] Admin can add web pages/URLs for the system to crawl and index
-- [ ] Admin can remove documents from the library
 - [ ] Widget is themeable (colors, logo) to match any site's brand
-- [ ] Backend runs on SiteGround shared hosting via cPanel Python Selector
-- [ ] LLM answers are generated via OpenRouter API (free-tier models)
-- [ ] Chat history is maintained within a session
-- [ ] Admin UI is password-protected
+
+### Current State
+
+Phase 4 complete — Admin UI live on staging at /dochat/admin. Pico.css v2 styled, Basic Auth protected, document upload/delete/URL ingest working, leads table ready for Phase 6. 76/76 tests passing.
 
 ### Out of Scope
 
