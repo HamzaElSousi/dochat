@@ -1,0 +1,16 @@
+# Phase 6: Lead Capture routes
+# Append these routing rules to the existing .htaccess CGI section.
+# Each rule routes the named path to the CGI app. The escaped dots prevent
+# wildcard traversal (same pattern as Phase 4/5 patches).
+
+# Lead capture submission endpoint (widget → server)
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule ^dochat/api/leads$ /cgi-bin/dochat.cgi/$0 [QSA,L]
+
+# Public settings endpoint (widget fetches book_call_url on init)
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule ^dochat/api/settings$ /cgi-bin/dochat.cgi/$0 [QSA,L]
+
+# Admin settings page and API (POST)
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule ^dochat/admin/settings$ /cgi-bin/dochat.cgi/$0 [QSA,L]
