@@ -111,6 +111,7 @@ def init_leads_table(conn: sqlite3.Connection) -> None:
     email:      lead's email address
     question:   the visitor question that triggered the lead capture
     created_at: ISO-8601 UTC timestamp
+    phone:      lead's phone number (Phase 6 — optional, may be NULL)
     """
     conn.execute("""
         CREATE TABLE IF NOT EXISTS leads (
@@ -119,6 +120,27 @@ def init_leads_table(conn: sqlite3.Connection) -> None:
             email      TEXT NOT NULL,
             question   TEXT NOT NULL,
             created_at TEXT NOT NULL
+        )
+    """)
+    # Phase 6: add phone column if not present (idempotent)
+    existing = [row[1] for row in conn.execute("PRAGMA table_info(leads)").fetchall()]
+    if 'phone' not in existing:
+        conn.execute("ALTER TABLE leads ADD COLUMN phone TEXT")
+    conn.commit()
+
+
+def init_settings_table(conn: sqlite3.Connection) -> None:
+    """Create settings table if it does not exist.
+
+    key:   arbitrary setting name (e.g. 'book_call_url')
+    value: setting value as text
+
+    No pre-seeded rows — defaults to empty string when key absent.
+    """
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS settings (
+            key   TEXT PRIMARY KEY,
+            value TEXT NOT NULL DEFAULT ''
         )
     """)
     conn.commit()
@@ -141,6 +163,7 @@ def init_db(app: flask.Flask) -> None:
     init_document_tables(conn)
     init_session_tables(conn)   # new — D-01
     init_leads_table(conn)      # Phase 4 — leads schema (populated in Phase 6)
+    init_settings_table(conn)   # Phase 6 — book-call URL and other settings
 
     app.config['DB_CONN'] = conn
     app.config['SQLITE_VEC_MODE'] = mode
