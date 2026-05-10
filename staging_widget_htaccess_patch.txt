@@ -1,0 +1,19 @@
+# DocChat Widget — Phase 5 .htaccess addition
+# Add this line to ~/www/staging.social-automate.com/public_html/.htaccess
+# Place it BEFORE the closing </IfModule> of the existing RewriteEngine block,
+# after the existing /health, /chat, and /dochat/admin rules.
+
+    RewriteRule ^dochat/widget\.js$ /app.cgi/dochat/widget.js [QSA,L]
+
+# This routes https://staging.social-automate.com/dochat/widget.js through
+# the CGI handler so Flask can serve app/static/widget.js with correct headers.
+# The rule is anchored (^...$) with an escaped dot so only the exact path matches —
+# no wildcard path traversal possible. The [L] flag stops further rule processing
+# (T-05-10 mitigated).
+
+# After applying, restart the app (touch the CGI entry point):
+#   touch ~/www/staging.social-automate.com/public_html/app.cgi
+#
+# Then verify:
+#   curl -I https://staging.social-automate.com/dochat/widget.js
+#   (Expected: 200 OK with Content-Type: application/javascript)
