@@ -298,6 +298,67 @@
     '#dc-send:disabled { opacity: 0.4; cursor: not-allowed; }',
     '#dc-send:focus { outline: 2px solid var(--dc-primary); outline-offset: 2px; }',
 
+    /* Lead capture form */
+    '.dc-lead-form {',
+    '  background: var(--dc-bot-bubble, #f1f5f9);',
+    '  border-radius: var(--dc-radius) var(--dc-radius) var(--dc-radius) 4px;',
+    '  padding: 12px 16px;',
+    '  align-self: flex-start;',
+    '  margin-right: auto;',
+    '  max-width: 90%;',
+    '  width: 90%;',
+    '  font-size: 14px;',
+    '}',
+    '.dc-lead-form p { margin: 0 0 8px; font-size: 14px; color: var(--dc-text, #1e293b); line-height: 1.4; }',
+    '.dc-lead-form input {',
+    '  width: 100%;',
+    '  padding: 6px 10px;',
+    '  margin-bottom: 6px;',
+    '  border: 1px solid #cbd5e1;',
+    '  border-radius: 6px;',
+    '  font-size: 14px;',
+    '  font-family: var(--dc-font-family, inherit);',
+    '  box-sizing: border-box;',
+    '}',
+    '.dc-lead-form input:focus { outline: 2px solid var(--dc-primary); outline-offset: 1px; }',
+    '.dc-lead-submit {',
+    '  width: 100%;',
+    '  padding: 8px;',
+    '  background: var(--dc-primary);',
+    '  color: #fff;',
+    '  border: none;',
+    '  border-radius: 6px;',
+    '  font-size: 14px;',
+    '  cursor: pointer;',
+    '  margin-top: 4px;',
+    '  min-height: 44px;',
+    '}',
+    '.dc-lead-submit:disabled { opacity: 0.5; cursor: not-allowed; }',
+    '.dc-cta-btn {',
+    '  display: inline-block;',
+    '  margin-top: 8px;',
+    '  padding: 10px 16px;',
+    '  background: var(--dc-primary);',
+    '  color: #fff;',
+    '  border-radius: 6px;',
+    '  text-decoration: none;',
+    '  font-size: 14px;',
+    '  font-weight: 600;',
+    '  min-height: 44px;',
+    '  line-height: 24px;',
+    '}',
+    '.dc-cta-btn:hover { filter: brightness(0.9); }',
+    '.dc-thankyou {',
+    '  background: var(--dc-bot-bubble, #f1f5f9);',
+    '  border-radius: var(--dc-radius) var(--dc-radius) var(--dc-radius) 4px;',
+    '  padding: 12px 16px;',
+    '  align-self: flex-start;',
+    '  margin-right: auto;',
+    '  max-width: 90%;',
+    '  font-size: 14px;',
+    '  color: var(--dc-text, #1e293b);',
+    '}',
+
     /* Reduced motion */
     '@media (prefers-reduced-motion: reduce) {',
     '  #dc-panel { transition: none; }',
@@ -378,10 +439,12 @@
 
   /* ── Section 5: State and DOM refs ── */
   var state = {
-    open:      false,
-    loading:   false,
-    sessionId: sessionStorage.getItem('dochat_session_id') || null,
-    messages:  [],   // {role:'user'|'bot'|'error', text:str} — JS memory only
+    open:           false,
+    loading:        false,
+    sessionId:      sessionStorage.getItem('dochat_session_id') || null,
+    messages:       [],   // {role:'user'|'bot'|'error', text:str} — JS memory only
+    _leadSubmitted: false,   // D-02: prevents repeat form on subsequent fallback: true
+    _settingsUrl:   '',      // D-12: fetched once on init from GET /dochat/api/settings
   };
 
   var fab      = shadow.getElementById('dc-fab');
@@ -400,6 +463,26 @@
     input.disabled = true;
     sendBtn.disabled = true;
     input.placeholder = 'Chat unavailable — apiUrl not configured';
+  }
+
+  /* ── Section 6b: Fetch settings from backend (D-12) ── */
+  function fetchSettings() {
+    // Derive settings URL: replace trailing /chat with /api/settings,
+    // or use explicit cfg.settingsUrl if provided
+    var settingsUrl = cfg.settingsUrl || cfg.apiUrl.replace(/\/chat$/, '/api/settings');
+    if (!settingsUrl || settingsUrl === cfg.apiUrl) return;  // guard: apiUrl has no /chat suffix
+    fetch(settingsUrl)
+      .then(function (res) { return res.ok ? res.json() : null; })
+      .then(function (data) {
+        if (data && data.book_call_url) {
+          state._settingsUrl = data.book_call_url;
+        }
+      })
+      .catch(function () { /* silent — non-critical */ });
+  }
+
+  if (cfg.apiUrl) {
+    fetchSettings();
   }
 
   /* ── Section 7: Apply DocChatConfig title and logo ── */
@@ -538,6 +621,92 @@
     return div;
   }
 
+  function addLeadForm(question) {
+    var wrapper = document.createElement('div');
+    wrapper.className = 'dc-lead-form';
+
+    var heading = document.createElement('p');
+    heading.textContent = "I couldn't find an answer to that. Leave your details and we'll get back to you.";
+    wrapper.appendChild(heading);
+
+    var nameInput = document.createElement('input');
+    nameInput.type = 'text'; nameInput.placeholder = 'Your name'; nameInput.maxLength = 200;
+    nameInput.setAttribute('aria-label', 'Your name');
+    wrapper.appendChild(nameInput);
+
+    var emailInput = document.createElement('input');
+    emailInput.type = 'email'; emailInput.placeholder = 'Your email'; emailInput.maxLength = 254;
+    emailInput.setAttribute('aria-label', 'Your email');
+    wrapper.appendChild(emailInput);
+
+    var phoneInput = document.createElement('input');
+    phoneInput.type = 'tel'; phoneInput.placeholder = 'Your phone (optional)'; phoneInput.maxLength = 30;
+    phoneInput.setAttribute('aria-label', 'Your phone');
+    wrapper.appendChild(phoneInput);
+
+    var submitBtn = document.createElement('button');
+    submitBtn.className = 'dc-lead-submit';
+    submitBtn.textContent = 'Send';
+    wrapper.appendChild(submitBtn);
+
+    submitBtn.addEventListener('click', function () {
+      var name  = nameInput.value.trim();
+      var email = emailInput.value.trim();
+      var phone = phoneInput.value.trim();
+      if (!name || !email) {
+        nameInput.style.borderColor  = name  ? '#cbd5e1' : '#ef4444';
+        emailInput.style.borderColor = email ? '#cbd5e1' : '#ef4444';
+        return;
+      }
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Sending…';
+
+      // Derive leads URL: replace /chat suffix with /api/leads (same pattern as settings)
+      var leadsUrl = cfg.leadsUrl || cfg.apiUrl.replace(/\/chat$/, '/api/leads');
+      fetch(leadsUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: name, email: email, phone: phone, question: question }),
+      })
+        .then(function (res) { return res.ok ? res.json() : Promise.reject(res.status); })
+        .then(function () {
+          state._leadSubmitted = true;  // D-02
+          // Replace form with thank-you + CTA (D-05)
+          var ty = document.createElement('div');
+          ty.className = 'dc-thankyou';
+          var tyMsg = document.createElement('p');
+          tyMsg.textContent = "Thank you! We'll be in touch soon.";
+          ty.appendChild(tyMsg);
+          if (state._settingsUrl) {
+            var cta = document.createElement('a');
+            cta.className = 'dc-cta-btn';
+            cta.href = state._settingsUrl;
+            cta.target = '_blank';
+            cta.rel = 'noopener noreferrer';
+            cta.textContent = 'Book a Call';
+            ty.appendChild(cta);
+          }
+          wrapper.replaceWith(ty);
+          scrollToBottom();
+        })
+        .catch(function () {
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Send';
+          var errMsg = document.createElement('p');
+          errMsg.style.color = '#ef4444';
+          errMsg.textContent = 'Could not submit. Please try again.';
+          if (!wrapper.querySelector('.dc-lead-err')) {
+            errMsg.className = 'dc-lead-err';
+            wrapper.appendChild(errMsg);
+          }
+        });
+    });
+
+    messages.appendChild(wrapper);
+    scrollToBottom();
+    return wrapper;
+  }
+
   /* ── Section 12: sendMessage() and API call ── */
   function setLoading(on) {
     state.loading = on;
@@ -575,14 +744,18 @@
       })
       .then(function (data) {
         typingEl.remove();
-        // Persist session_id
         if (data.session_id) {
           state.sessionId = data.session_id;
           sessionStorage.setItem('dochat_session_id', data.session_id);
         }
-        var chips = Array.isArray(data.chips) ? data.chips : [];
-        addBotBubble(data.answer || '', chips);
-        state.messages.push({ role: 'bot', text: data.answer || '' });
+        // D-01: any fallback:true response triggers lead form (if not already submitted)
+        if (data.fallback && !state._leadSubmitted) {
+          addLeadForm(text);   // D-03: form replaces fallback bubble; question captured from 'text' closure
+        } else {
+          var chips = Array.isArray(data.chips) ? data.chips : [];
+          addBotBubble(data.answer || '', chips);
+          state.messages.push({ role: 'bot', text: data.answer || '' });
+        }
       })
       .catch(function () {
         typingEl.remove();
