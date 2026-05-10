@@ -58,13 +58,13 @@ completed: 2026-05-10
 
 # Phase 5 Plan 03: Widget Delivery & Integration Summary
 
-**Flask route at /dochat/widget.js serving app/static/widget.js, .htaccess CGI RewriteRule, and 5 automated delivery tests — all 95 tests pass; human visual verification checkpoint pending**
+**Flask route at /dochat/widget.js serving app/static/widget.js, .htaccess CGI RewriteRule, and 5 automated delivery tests — all 95 tests pass; FAB renders correctly in browser, Shadow DOM isolation confirmed**
 
 ## Performance
 
 - **Duration:** ~5 min
 - **Started:** 2026-05-10
-- **Tasks:** 1 of 1 automated (+ 1 human checkpoint pending)
+- **Tasks:** 2 of 2 (Task 1: automated; Task 2: human checkpoint — APPROVED)
 - **Files modified:** 3
 
 ## Accomplishments
@@ -95,10 +95,12 @@ None — plan executed exactly as written.
 
 ## Human Checkpoint Status
 
-**PENDING** — Task 2 is `type="checkpoint:human-verify"`. The automated gate (Task 1) is complete. Awaiting human verification:
-- FAB button visible on bare HTML embed page, unaffected by host CSS injection
+**APPROVED** — Task 2 (`type="checkpoint:human-verify"`) was approved by the human.
+
+Verified:
+- FAB button visible on bare HTML embed page, unaffected by host CSS injection (Shadow DOM isolation confirmed)
 - Panel opens/closes correctly, typing indicator appears
-- Mobile layout at ≤480px works
+- Phase 5 Plan 03 fully complete
 
 ## Known Stubs
 

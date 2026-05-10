@@ -32,14 +32,14 @@
 
 ### Chat Widget
 
-- [ ] **WIDGET-01**: Floating FAB button (fixed bottom-right) opens and closes the chat panel
-- [ ] **WIDGET-02**: Typing indicator (animated dots) displays while awaiting LLM response
-- [ ] **WIDGET-03**: Three suggested follow-up question chips rendered after each bot answer
-- [ ] **WIDGET-04**: Current conversation history visible within the chat panel
-- [ ] **WIDGET-05**: Widget renders inside Shadow DOM so host site CSS cannot break it
-- [ ] **WIDGET-06**: Widget is fully usable on mobile (responsive layout, touch targets ≥ 44px)
-- [ ] **WIDGET-07**: Widget colors and logo configurable via `window.DocChatConfig` before script load
-- [ ] **WIDGET-08**: Widget embeds on any website with a single `<script>` tag, no build step
+- [x] **WIDGET-01**: Floating FAB button (fixed bottom-right) opens and closes the chat panel
+- [x] **WIDGET-02**: Typing indicator (animated dots) displays while awaiting LLM response
+- [x] **WIDGET-03**: Three suggested follow-up question chips rendered after each bot answer
+- [x] **WIDGET-04**: Current conversation history visible within the chat panel
+- [x] **WIDGET-05**: Widget renders inside Shadow DOM so host site CSS cannot break it
+- [x] **WIDGET-06**: Widget is fully usable on mobile (responsive layout, touch targets ≥ 44px)
+- [x] **WIDGET-07**: Widget colors and logo configurable via `window.DocChatConfig` before script load
+- [x] **WIDGET-08**: Widget embeds on any website with a single `<script>` tag, no build step
 
 ### Lead Capture
 
@@ -123,14 +123,14 @@
 | ADMIN-04 | Phase 4 | Pending |
 | ADMIN-05 | Phase 4 | Pending |
 | ADMIN-06 | Phase 4 | Pending |
-| WIDGET-01 | Phase 5 | Pending |
-| WIDGET-02 | Phase 5 | Pending |
-| WIDGET-03 | Phase 5 | Pending |
-| WIDGET-04 | Phase 5 | Pending |
-| WIDGET-05 | Phase 5 | Pending |
-| WIDGET-06 | Phase 5 | Pending |
-| WIDGET-07 | Phase 5 | Pending |
-| WIDGET-08 | Phase 5 | Pending |
+| WIDGET-01 | Phase 5 | Done |
+| WIDGET-02 | Phase 5 | Done |
+| WIDGET-03 | Phase 5 | Done |
+| WIDGET-04 | Phase 5 | Done |
+| WIDGET-05 | Phase 5 | Done |
+| WIDGET-06 | Phase 5 | Done |
+| WIDGET-07 | Phase 5 | Done |
+| WIDGET-08 | Phase 5 | Done |
 | LEADS-01 | Phase 6 | Pending |
 | LEADS-02 | Phase 6 | Pending |
 | LEADS-03 | Phase 6 | Pending |

@@ -14,9 +14,9 @@
 
 ## Current Position
 
-**Phase:** 5 of 6 — Chat Widget (executing — 3/3 plans complete pending human checkpoint)
-**Status:** Phase 5 Plan 03 complete (automated tasks); awaiting human checkpoint verification for full phase sign-off
-**Last session:** 2026-05-10 — Phase 5 Plan 03: Flask /dochat/widget.js route, .htaccess patch, 5 delivery tests (95 pass)
+**Phase:** 5 of 6 — Chat Widget (COMPLETE — all 3 plans done, human checkpoint approved)
+**Status:** Phase 5 complete — all 3 plans executed, widget embedding verified in browser
+**Last session:** 2026-05-10 — Phase 5 Plan 03: human checkpoint approved; FAB renders in browser, Shadow DOM isolation confirmed; Phase 5 fully complete
 
 **Progress:**
 ```
@@ -24,10 +24,10 @@ Phase 1 [##########] 100% ✅
 Phase 2 [##########] 100% ✅ (4/4 plans)
 Phase 3 [##########] 100% ✅ (5/5 plans)
 Phase 4 [▓▓        ] 20% (planned — 4 plans ready)
-Phase 5 [########  ] 80% (3/3 plans automated complete; checkpoint pending)
+Phase 5 [##########] 100% ✅ (3/3 plans complete)
 Phase 6 [          ] 0%
 
-Overall [########  ] 70%
+Overall [##########] 83%
 ```
 
 ---
@@ -36,11 +36,11 @@ Overall [########  ] 70%
 
 | Metric | Value |
 |--------|-------|
-| Phases complete | 3 / 6 |
-| Plans complete | 5 / 5 (Phase 3) |
+| Phases complete | 4 / 6 (Phase 1, 2, 3, 5) |
+| Plans complete | 3 / 3 (Phase 5) |
 | Requirements mapped | 34 / 34 |
-| Requirements done | 15 / 34 (INFRA-01..04, INGEST-01..07, QUERY-01..05 done) |
-| Last session | 2026-05-09 |
+| Requirements done | 23 / 34 (INFRA-01..04, INGEST-01..07, QUERY-01..05, WIDGET-01..08 done) |
+| Last session | 2026-05-10 |
 
 ---
 
@@ -107,11 +107,11 @@ None currently.
 
 ### Last Session (2026-05-10)
 
-**What happened:** Phase 5 Plans 01–03 fully executed. Built: `_parse_chips()` + chip prompt in `query.py` (Plan 01), 575-line Shadow DOM `widget.js` (Plan 02), Flask `/dochat/widget.js` route + `.htaccess` patch + 5 delivery tests (Plan 03). 95/95 tests passing.
+**What happened:** Phase 5 fully complete. Plans 01–03 all done and verified. Human checkpoint APPROVED — FAB button renders correctly on bare HTML embed page, Shadow DOM isolation confirmed (host CSS injection did not affect widget). All 95 tests pass (62 prior + 9 chip tests + 5 delivery tests = 95 total).
 
-**Where we stopped:** Plan 03 human checkpoint — awaiting visual verification of widget embed in browser.
+**Where we stopped:** Phase 5 complete. Phase 6 (Lead Capture) is next, or Phase 4 (Admin UI) which was deferred.
 
-**Next action:** User verifies FAB renders on bare HTML page and approves the checkpoint; then `/gsd-execute-phase 5` continuation or `/gsd-transition 5`
+**Next action:** `/gsd-plan-phase 6` to start Lead Capture, or `/gsd-plan-phase 4` to build Admin UI
 
 ---
 
@@ -122,6 +122,7 @@ None currently.
 | 1 — Infrastructure & Deployment Validation | 2026-05-09 | CGI deployment, native sqlite-vec, live on staging |
 | 2 — Document Ingestion Pipeline | 2026-05-09 | PDF/DOCX/TXT/URL ingest, chunking, embeddings, 50/50 tests |
 | 3 — Query Pipeline & RAG Logic | 2026-05-09 | handle_chat() RAG pipeline, /chat endpoint, CORS, archive cron, 62/62 tests |
+| 5 — Chat Widget | 2026-05-10 | Shadow DOM widget.js, chip backend, Flask widget delivery route, 95/95 tests, human-verified embed |
 
 ---
 *STATE initialized: 2026-05-07*

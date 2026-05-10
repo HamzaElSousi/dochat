@@ -14,7 +14,7 @@
 - [x] **Phase 2: Document Ingestion Pipeline** — Admin can upload PDF/DOCX/TXT/MD files and submit URLs; system parses, chunks, embeds, and indexes all content *(completed 2026-05-09)*
 - [x] **Phase 3: Query Pipeline & RAG Logic** — Visitor messages are embedded, searched, gated by similarity threshold, and answered by LLM with session history *(completed 2026-05-09)*
 - [ ] **Phase 4: Admin UI** — Password-protected web UI for document management, URL submission, and lead review
-- [ ] **Phase 5: Chat Widget** — Embeddable vanilla JS widget with Shadow DOM isolation, theming, and full UX polish
+- [x] **Phase 5: Chat Widget** — Embeddable vanilla JS widget with Shadow DOM isolation, theming, and full UX polish *(completed 2026-05-10)*
 - [ ] **Phase 6: Lead Capture** — Similarity fallback triggers inline lead form; captured leads stored, emailed, and viewable by admin
 
 ---
@@ -133,9 +133,9 @@ Plans:
 **Plans:** 3 plans
 
 Plans:
-- [ ] 05-01-PLAN.md — Backend chips: modify query.py (_parse_chips helper + chip prompt) + chat.py docstring + tests/test_chat_chips.py (9 tests)
-- [ ] 05-02-PLAN.md — Widget JS: create app/static/widget.js (full Shadow DOM widget, ~350+ lines, IIFE, zero deps)
-- [ ] 05-03-PLAN.md — Widget delivery: /dochat/widget.js Flask route in app/__init__.py + staging_widget_htaccess_patch.txt + tests/test_widget_delivery.py (5 tests) + human embed verification
+- [x] 05-01-PLAN.md — Backend chips: modify query.py (_parse_chips helper + chip prompt) + chat.py docstring + tests/test_chat_chips.py (9 tests)
+- [x] 05-02-PLAN.md — Widget JS: create app/static/widget.js (full Shadow DOM widget, ~350+ lines, IIFE, zero deps)
+- [x] 05-03-PLAN.md — Widget delivery: /dochat/widget.js Flask route in app/__init__.py + staging_widget_htaccess_patch.txt + tests/test_widget_delivery.py (5 tests) + human embed verification
 
 **Wave dependency notes:**
 - **Wave 1** — 05-01 (backend chips), 05-02 (widget JS) — parallel, no shared files
@@ -165,7 +165,7 @@ Plans:
 | 2. Document Ingestion Pipeline | 4/4 | Complete | 2026-05-09 |
 | 3. Query Pipeline & RAG Logic | 5/5 | Complete | 2026-05-09 |
 | 4. Admin UI | 0/4 | In progress | - |
-| 5. Chat Widget | 0/3 | Planned | - |
+| 5. Chat Widget | 3/3 | Complete | 2026-05-10 |
 | 6. Lead Capture | 0/? | Not started | - |
 
 ---
