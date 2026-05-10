@@ -189,6 +189,8 @@ def admin_settings_save():
             ['book_call_url', book_call_url]
         )
         conn.execute("COMMIT")
+        # Force WAL checkpoint so other CGI processes see the write (Passenger/CGI snapshot issue)
+        conn.execute("PRAGMA wal_checkpoint(TRUNCATE)")
     except Exception:
         conn.execute("ROLLBACK")
         return jsonify({"error": "Failed to save settings"}), 500
@@ -239,6 +241,8 @@ def public_leads():
             [lead_id, name, email, phone, question, timestamp]
         )
         conn.execute("COMMIT")
+        # Force WAL checkpoint so other CGI processes see the write
+        conn.execute("PRAGMA wal_checkpoint(TRUNCATE)")
     except Exception:
         conn.execute("ROLLBACK")
         resp = jsonify({"error": "Failed to save lead"})
