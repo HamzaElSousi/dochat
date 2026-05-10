@@ -130,8 +130,18 @@ Plans:
   4. The widget renders inside Shadow DOM — injecting conflicting CSS rules into the host page does not alter widget appearance
   5. The widget is fully operable on a 375px-wide mobile screen with all touch targets measuring at least 44px
   6. Setting `window.DocChatConfig = { primaryColor: '#ff0000', logo: '...' }` before the script tag changes widget colors and logo accordingly
-**Plans:** TBD
-**UI hint**: yes
+**Plans:** 3 plans
+
+Plans:
+- [ ] 05-01-PLAN.md — Backend chips: modify query.py (_parse_chips helper + chip prompt) + chat.py docstring + tests/test_chat_chips.py (9 tests)
+- [ ] 05-02-PLAN.md — Widget JS: create app/static/widget.js (full Shadow DOM widget, ~350+ lines, IIFE, zero deps)
+- [ ] 05-03-PLAN.md — Widget delivery: /dochat/widget.js Flask route in app/__init__.py + staging_widget_htaccess_patch.txt + tests/test_widget_delivery.py (5 tests) + human embed verification
+
+**Wave dependency notes:**
+- **Wave 1** — 05-01 (backend chips), 05-02 (widget JS) — parallel, no shared files
+- **Wave 2** *(blocked on Wave 1)* — 05-03 (delivery + integration, depends on both 05-01 and 05-02)
+
+**Cross-cutting constraints:** No torch/transformers; no npm/build step; widget.js is a single IIFE (no ES module imports); Shadow DOM isolation mandatory; secrets from .env only; Flask only.
 
 ### Phase 6: Lead Capture
 **Goal:** When the RAG pipeline cannot answer a visitor's question, the widget captures the visitor's contact information and notifies admin — so no potential lead is lost.
@@ -155,7 +165,7 @@ Plans:
 | 2. Document Ingestion Pipeline | 4/4 | Complete | 2026-05-09 |
 | 3. Query Pipeline & RAG Logic | 5/5 | Complete | 2026-05-09 |
 | 4. Admin UI | 0/4 | In progress | - |
-| 5. Chat Widget | 0/? | Not started | - |
+| 5. Chat Widget | 0/3 | Planned | - |
 | 6. Lead Capture | 0/? | Not started | - |
 
 ---
@@ -211,3 +221,4 @@ Plans:
 *Updated: 2026-05-09 — Phase 3 Plan 01 complete (sessions table, embed_query wrapper, chat_bp stub; 50/50 tests pass)*
 *Updated: 2026-05-09 — Phase 3 complete (5/5 plans; handle_chat RAG pipeline, /chat route, CORS, archive cron, 62/62 tests pass)*
 *Updated: 2026-05-09 — Phase 4 plans created (04-01 through 04-04); 4 plans in 4 waves*
+*Updated: 2026-05-09 — Phase 5 plans created (05-01 through 05-03); 3 plans in 2 waves*

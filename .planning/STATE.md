@@ -7,16 +7,16 @@
 ## Project Reference
 
 **Core Value:** A visitor asks a question and gets a correct, sourced answer from your actual documents — not a hallucination and not a dead end.
-**Current Focus:** Phase 4 — Admin UI
+**Current Focus:** Phase 5 — Chat Widget
 **Milestone:** v1 — Embeddable RAG chatbot on SiteGround shared hosting
 
 ---
 
 ## Current Position
 
-**Phase:** 4 of 6 — Admin UI (ready to execute)
-**Status:** Phase 4 planned — 4/4 plans created; ready to execute
-**Last session:** 2026-05-09 — Phase 5 context gathered (Chat Widget: panel design, chip generation strategy, session storage, DocChatConfig shape)
+**Phase:** 5 of 6 — Chat Widget (planned — 3 plans ready)
+**Status:** Phase 5 planned — 3/3 plans created; ready to execute
+**Last session:** 2026-05-09 — Phase 5 planned (backend chips, widget JS, delivery+integration)
 
 **Progress:**
 ```
@@ -24,10 +24,10 @@ Phase 1 [##########] 100% ✅
 Phase 2 [##########] 100% ✅ (4/4 plans)
 Phase 3 [##########] 100% ✅ (5/5 plans)
 Phase 4 [▓▓        ] 20% (planned — 4 plans ready)
-Phase 5 [          ] 0%
+Phase 5 [▓▓        ] 20% (planned — 3 plans ready)
 Phase 6 [          ] 0%
 
-Overall [######    ] 50%
+Overall [#######   ] 58%
 ```
 
 ---
