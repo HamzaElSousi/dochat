@@ -18,8 +18,8 @@ FALLBACK_MESSAGE = os.environ.get(
 )
 ASSISTANT_NAME = os.environ.get('ASSISTANT_NAME', 'DocChat Assistant')
 ASSISTANT_PERSONA = os.environ.get('ASSISTANT_PERSONA', 'a helpful AI assistant')
-PRIMARY_MODEL = 'google/gemma-3-27b-it:free'
-FALLBACK_MODEL = 'qwen/qwen3-next-80b-a3b-instruct:free'
+PRIMARY_MODEL = os.environ.get('PRIMARY_MODEL', 'meta-llama/llama-3.3-70b-instruct:free')
+FALLBACK_MODEL = os.environ.get('FALLBACK_MODEL', 'google/gemma-3-12b-it:free')
 LLM_TIMEOUT = 30          # seconds per model attempt (D-13)
 TOP_K = 4                 # top chunks to retrieve (QUERY-01)
 MAX_HISTORY_TURNS = 10    # turns = user+assistant pairs; cap = 20 messages (QUERY-04)
