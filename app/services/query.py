@@ -1,5 +1,6 @@
 import json
 import os
+import re
 import sqlite3
 import uuid
 from datetime import datetime, timezone
@@ -60,6 +61,38 @@ def _call_llm_with_retry(messages: list[dict]) -> str | None:
         except (requests.exceptions.Timeout, requests.HTTPError, requests.RequestException):
             continue
     return None
+
+
+def _parse_chips(raw: str) -> tuple[str, list[str]]:
+    """Extract chips JSON from raw LLM output. Returns (answer_text, chips).
+
+    Expects LLM to append a JSON block after its answer:
+      {"chips": ["Q1", "Q2", "Q3"]}
+
+    Rules:
+    - The JSON block must be the last {...} in the response.
+    - chips must be a list of exactly 3 non-empty strings.
+    - On any parse failure: return (raw, []) — silent fail per D-07.
+    - The chip JSON block is stripped from the returned answer_text.
+    """
+    # Find last JSON object in the response
+    match = re.search(r'\{[^{}]*"chips"\s*:\s*\[[^\]]*\][^{}]*\}', raw, re.DOTALL)
+    if not match:
+        return raw, []
+    json_str = match.group(0)
+    try:
+        data = json.loads(json_str)
+    except (json.JSONDecodeError, ValueError):
+        return raw, []
+    chips = data.get('chips')
+    if not isinstance(chips, list) or len(chips) != 3:
+        return raw, []
+    chips = [str(c).strip() for c in chips]
+    if not all(chips):   # reject if any chip is empty string after strip
+        return raw, []
+    # Strip the chip JSON block from the answer text
+    answer_text = raw[:match.start()].rstrip()
+    return answer_text, chips
 
 
 # ── Session helpers ──────────────────────────────────────────────────────────
@@ -131,7 +164,11 @@ def handle_chat(
     """Embed query → vector search → similarity gate → LLM → save session → return dict.
 
     Always returns:
-      {"answer": str, "session_id": str, "fallback": bool, "sources": list[dict]}
+      {"answer": str, "session_id": str, "fallback": bool, "sources": list[dict],
+       "chips": list[str]}
+
+    chips is a list of up to 3 follow-up question strings. Empty list on fallback or
+    when chip parsing fails (silent fail per D-07).
 
     Never raises to caller — all LLM/embed failures degrade to fallback message (D-14).
     """
@@ -150,6 +187,7 @@ def handle_chat(
             'session_id': session_id,
             'fallback': True,
             'sources': [],
+            'chips': [],
         }
 
     # ── Step 2: Vector search (top-k=4) ──────────────────────────────────────
@@ -167,6 +205,7 @@ def handle_chat(
             'session_id': session_id,
             'fallback': True,
             'sources': [],
+            'chips': [],
         }
 
     chunk_ids = [row[0] for row in hits]
@@ -204,24 +243,30 @@ def handle_chat(
         "Answer ONLY using the context provided below. "
         "If the context does not contain enough information to answer the question, "
         "say you don't know. Do not use any outside knowledge.\n\n"
-        f"Context:\n{context_text}"
+        f"Context:\n{context_text}\n\n"
+        "After your answer, on a new line, output EXACTLY this JSON and nothing else after it:\n"
+        '{"chips": ["<follow-up question 1>", "<follow-up question 2>", "<follow-up question 3>"]}\n'
+        "The three follow-up questions must be short (under 12 words each) and directly relevant to the answer."
     )
     llm_messages = [{'role': 'system', 'content': system_prompt}]
     llm_messages.extend(history)
     llm_messages.append({'role': 'user', 'content': message})
 
     # ── Step 7: Call LLM with retry (QUERY-05) ────────────────────────────────
-    answer = _call_llm_with_retry(llm_messages)
-    if answer is None:
+    raw_answer = _call_llm_with_retry(llm_messages)
+    if raw_answer is None:
         # Both models failed — graceful degradation (D-14)
         return {
             'answer': FALLBACK_MESSAGE,
             'session_id': session_id,
             'fallback': True,
             'sources': sources,
+            'chips': [],
         }
+    answer, chips = _parse_chips(raw_answer)
 
     # ── Step 8: Persist updated session ──────────────────────────────────────
+    # Store chip-stripped answer (not raw_answer) in session history
     updated_history = history + [
         {'role': 'user', 'content': message},
         {'role': 'assistant', 'content': answer},
@@ -237,4 +282,5 @@ def handle_chat(
         'session_id': session_id,
         'fallback': False,
         'sources': sources,
+        'chips': chips,
     }

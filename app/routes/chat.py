@@ -35,7 +35,9 @@ def chat():
     """Public chat endpoint — no authentication required (D-04).
 
     POST body: {"message": "...", "session_id": "..."}  (session_id optional, D-05)
-    Response:  {"answer": "...", "session_id": "...", "fallback": bool, "sources": [...]} (D-06)
+    Response:  {"answer": "...", "session_id": "...", "fallback": bool,
+                "sources": [...], "chips": ["Q1", "Q2", "Q3"]}
+               chips is [] when fallback=true or when chip parsing fails (D-07).
     """
     origin = request.headers.get('Origin', '')
     cors = _cors_headers(origin)
