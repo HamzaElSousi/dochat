@@ -37,17 +37,24 @@
   var shadow = host.attachShadow({ mode: 'open' });
 
   /* ── Section 3: CSS string ── */
+  function sanitizeCssValue(val, fallback) {
+    if (typeof val !== 'string') return fallback;
+    // Reject values containing characters that could break out of CSS context
+    if (/[<>"'`{}\\;]/.test(val)) return fallback;
+    return val;
+  }
+
   var style = document.createElement('style');
   style.textContent = [
     /* Custom properties (theming) */
     ':host {',
-    '  --dc-primary:     ' + (cfg.primaryColor || '#3b82f6') + ';',
-    '  --dc-header-bg:   ' + (cfg.headerBg || 'var(--dc-primary)') + ';',
-    '  --dc-bot-bubble:  ' + (cfg.botBubbleColor || '#f1f5f9') + ';',
-    '  --dc-user-bubble: ' + (cfg.userBubbleColor || 'var(--dc-primary)') + ';',
-    '  --dc-text:        ' + (cfg.textColor || '#1e293b') + ';',
-    '  --dc-radius:      ' + (cfg.borderRadius || '12px') + ';',
-    '  --dc-font-family: ' + (cfg.fontFamily || 'inherit') + ';',
+    '  --dc-primary:     ' + sanitizeCssValue(cfg.primaryColor, '#3b82f6') + ';',
+    '  --dc-header-bg:   ' + sanitizeCssValue(cfg.headerBg, 'var(--dc-primary)') + ';',
+    '  --dc-bot-bubble:  ' + sanitizeCssValue(cfg.botBubbleColor, '#f1f5f9') + ';',
+    '  --dc-user-bubble: ' + sanitizeCssValue(cfg.userBubbleColor, 'var(--dc-primary)') + ';',
+    '  --dc-text:        ' + sanitizeCssValue(cfg.textColor, '#1e293b') + ';',
+    '  --dc-radius:      ' + sanitizeCssValue(cfg.borderRadius, '12px') + ';',
+    '  --dc-font-family: ' + sanitizeCssValue(cfg.fontFamily, 'inherit') + ';',
     '  font-family: var(--dc-font-family, inherit);',
     '}',
 
@@ -492,6 +499,7 @@
         btn.className = 'dc-chip';
         btn.textContent = q;
         btn.addEventListener('click', function () {
+          if (state.loading) return;   // guard against double-click race (WR-06)
           chipsEl.remove();   // Remove chips from DOM on click (D-07)
           sendMessage(q);
         });
@@ -508,8 +516,23 @@
   function addErrorBubble() {
     var div = document.createElement('div');
     div.className = 'dc-bubble dc-bubble-error';
-    div.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>'
-                  + '<span>Something went wrong. Check your connection and try again.</span>';
+    // Build SVG via createElementNS to avoid innerHTML entirely
+    var ns = 'http://www.w3.org/2000/svg';
+    var svg = document.createElementNS(ns, 'svg');
+    svg.setAttribute('width', '16'); svg.setAttribute('height', '16');
+    svg.setAttribute('viewBox', '0 0 24 24'); svg.setAttribute('fill', 'none');
+    svg.setAttribute('stroke', '#ef4444'); svg.setAttribute('stroke-width', '2');
+    svg.setAttribute('stroke-linecap', 'round'); svg.setAttribute('stroke-linejoin', 'round');
+    var circle = document.createElementNS(ns, 'circle');
+    circle.setAttribute('cx', '12'); circle.setAttribute('cy', '12'); circle.setAttribute('r', '10');
+    var l1 = document.createElementNS(ns, 'line');
+    l1.setAttribute('x1', '12'); l1.setAttribute('y1', '8'); l1.setAttribute('x2', '12'); l1.setAttribute('y2', '12');
+    var l2 = document.createElementNS(ns, 'line');
+    l2.setAttribute('x1', '12'); l2.setAttribute('y1', '16'); l2.setAttribute('x2', '12.01'); l2.setAttribute('y2', '16');
+    svg.appendChild(circle); svg.appendChild(l1); svg.appendChild(l2);
+    var span = document.createElement('span');
+    span.textContent = 'Something went wrong. Check your connection and try again.';
+    div.appendChild(svg); div.appendChild(span);
     messages.appendChild(div);
     scrollToBottom();
     return div;

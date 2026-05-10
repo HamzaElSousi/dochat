@@ -1,7 +1,13 @@
 import os
+import re
 from flask import Blueprint, request, jsonify, current_app
 
 from ..services.query import handle_chat
+
+_UUID_RE = re.compile(
+    r'^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$',
+    re.IGNORECASE
+)
 
 chat_bp = Blueprint('chat', __name__)
 
@@ -55,8 +61,16 @@ def chat():
         resp.headers.update(cors)
         return resp, 400
 
+    MAX_MESSAGE_LEN = int(os.environ.get('MAX_MESSAGE_LEN', '2000'))
+    if len(message) > MAX_MESSAGE_LEN:
+        resp = jsonify({'error': 'Message too long'})
+        resp.headers.update(cors)
+        return resp, 400
+
     # session_id is optional — None signals new session (D-05)
-    session_id = data.get('session_id') or None
+    # Validate UUID v4 format to prevent session fixation / injection (CR-03)
+    session_id_raw = data.get('session_id') or None
+    session_id = session_id_raw if (session_id_raw and _UUID_RE.match(session_id_raw)) else None
 
     try:
         result = handle_chat(conn, message, session_id)

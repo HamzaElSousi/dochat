@@ -24,6 +24,15 @@ LLM_TIMEOUT = 30          # seconds per model attempt (D-13)
 TOP_K = 4                 # top chunks to retrieve (QUERY-01)
 MAX_HISTORY_TURNS = 10    # turns = user+assistant pairs; cap = 20 messages (QUERY-04)
 
+# Warn at module load if API key is absent — prevents silent 401 fallbacks (WR-01)
+if not os.environ.get('OPENROUTER_API_KEY'):
+    import warnings
+    warnings.warn(
+        "OPENROUTER_API_KEY is not set — all LLM calls will fail and return fallback message.",
+        RuntimeWarning,
+        stacklevel=2,
+    )
+
 
 # ── LLM helpers ─────────────────────────────────────────────────────────────
 
@@ -75,10 +84,12 @@ def _parse_chips(raw: str) -> tuple[str, list[str]]:
     - On any parse failure: return (raw, []) — silent fail per D-07.
     - The chip JSON block is stripped from the returned answer_text.
     """
-    # Find last JSON object in the response
-    match = re.search(r'\{[^{}]*"chips"\s*:\s*\[[^\]]*\][^{}]*\}', raw, re.DOTALL)
-    if not match:
+    # Find last JSON object containing "chips" — re.findall returns all matches;
+    # take the last one so a chips-like example earlier in the text is ignored (WR-03)
+    matches = list(re.finditer(r'\{[^{}]*"chips"\s*:\s*\[[^\]]*\][^{}]*\}', raw, re.DOTALL))
+    if not matches:
         return raw, []
+    match = matches[-1]
     json_str = match.group(0)
     try:
         data = json.loads(json_str)
@@ -116,6 +127,10 @@ def _save_session(
     """Upsert session row. Uses manual BEGIN/COMMIT/ROLLBACK — never 'with conn:'."""
     now_iso = datetime.now(timezone.utc).isoformat()
     if conn.in_transaction:
+        import logging
+        logging.getLogger(__name__).warning(
+            "_save_session: rolling back leaked transaction before BEGIN"
+        )
         conn.execute('ROLLBACK')
     conn.execute('BEGIN')
     try:

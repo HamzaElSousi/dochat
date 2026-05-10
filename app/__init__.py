@@ -39,7 +39,10 @@ def create_app():
         Flask validates the filename against the directory (T-05-11 mitigated).
         """
         static_dir = os.path.join(os.path.dirname(__file__), 'static')
-        return send_from_directory(static_dir, 'widget.js',
-                                   mimetype='application/javascript')
+        return send_from_directory(
+            static_dir, 'widget.js',
+            mimetype='application/javascript',
+            max_age=300,
+        )
 
     return app
