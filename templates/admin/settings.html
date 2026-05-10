@@ -1,0 +1,20 @@
+{% set active_page = 'settings' %}
+{% extends "admin/base.html" %}
+
+{% block content %}
+<h2>Settings</h2>
+<article>
+  <form id="settings-form">
+    <label for="book-call-url-input">Book a Call URL</label>
+    <input type="url" id="book-call-url-input" name="book_call_url"
+           value="{{ book_call_url | e }}"
+           placeholder="https://calendly.com/your-link"
+           aria-describedby="book-call-url-hint">
+    <small id="book-call-url-hint">
+      Visitors who trigger the lead capture form will see a "Book a Call" button linking to this URL.
+    </small>
+    <div id="settings-feedback" role="alert" aria-live="polite" hidden></div>
+    <button type="submit" id="settings-save-btn">Save Settings</button>
+  </form>
+</article>
+{% endblock %}

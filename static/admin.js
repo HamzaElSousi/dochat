@@ -155,6 +155,46 @@ function escapeHtml(str) {
     .replace(/"/g, '&quot;');
 }
 
+/* saveSettings(url) — POST JSON to /dochat/admin/settings */
+function saveSettings(url) {
+  var btn = document.getElementById('settings-save-btn');
+  var feedback = document.getElementById('settings-feedback');
+  if (btn) { btn.disabled = true; btn.textContent = 'Saving…'; }
+  if (feedback) { feedback.hidden = true; feedback.textContent = ''; }
+
+  fetch('/dochat/admin/settings', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ book_call_url: url }),
+  })
+    .then(function (res) { return res.json(); })
+    .then(function (data) {
+      if (data.saved) {
+        if (feedback) {
+          feedback.textContent = 'Settings saved.';
+          feedback.style.color = '#2d6a4f';
+          feedback.hidden = false;
+        }
+      } else {
+        if (feedback) {
+          feedback.textContent = 'Error: ' + (data.error || 'Could not save settings.');
+          feedback.style.color = '#c0392b';
+          feedback.hidden = false;
+        }
+      }
+    })
+    .catch(function () {
+      if (feedback) {
+        feedback.textContent = 'Could not reach the server. Check your connection and try again.';
+        feedback.style.color = '#c0392b';
+        feedback.hidden = false;
+      }
+    })
+    .finally(function () {
+      if (btn) { btn.disabled = false; btn.textContent = 'Save Settings'; }
+    });
+}
+
 /* DOMContentLoaded — attach all event handlers */
 document.addEventListener('DOMContentLoaded', function() {
   var dropZone = document.getElementById('drop-zone');
@@ -223,6 +263,16 @@ document.addEventListener('DOMContentLoaded', function() {
       var docId = btn.getAttribute('data-doc-id');
       var filename = btn.getAttribute('data-filename');
       if (docId && filename) deleteDoc(docId, filename);
+    });
+  }
+
+  /* Settings form submit */
+  var settingsForm = document.getElementById('settings-form');
+  if (settingsForm) {
+    settingsForm.addEventListener('submit', function (e) {
+      e.preventDefault();
+      var urlInput = document.getElementById('book-call-url-input');
+      saveSettings(urlInput ? urlInput.value.trim() : '');
     });
   }
 });
