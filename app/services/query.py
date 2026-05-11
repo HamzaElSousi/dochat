@@ -260,8 +260,10 @@ def handle_chat(
         "say you don't know. Do not use any outside knowledge.\n\n"
         f"Context:\n{context_text}\n\n"
         "After your answer, on a new line, output EXACTLY this JSON and nothing else after it:\n"
-        '{"chips": ["<follow-up question 1>", "<follow-up question 2>", "<follow-up question 3>"]}\n'
-        "The three follow-up questions must be short (under 12 words each) and directly relevant to the answer."
+        '{"chips": ["<question 1>", "<question 2>", "<question 3>"]}\n'
+        "The three chips are short questions (under 12 words each) written from the VISITOR'S perspective — "
+        "things the visitor might want to ask YOU next based on your answer. "
+        "Do NOT write questions you would ask the visitor."
     )
     llm_messages = [{'role': 'system', 'content': system_prompt}]
     llm_messages.extend(history)

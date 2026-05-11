@@ -671,23 +671,32 @@
         .then(function (res) { return res.ok ? res.json() : Promise.reject(res.status); })
         .then(function () {
           state._leadSubmitted = true;  // D-02
-          // Replace form with thank-you + CTA (D-05)
+          // Replace form with thank-you (D-05)
           var ty = document.createElement('div');
           ty.className = 'dc-thankyou';
           var tyMsg = document.createElement('p');
           tyMsg.textContent = "Thank you! We'll be in touch soon.";
           ty.appendChild(tyMsg);
-          if (state._settingsUrl) {
-            var cta = document.createElement('a');
-            cta.className = 'dc-cta-btn';
-            cta.href = state._settingsUrl;
-            cta.target = '_blank';
-            cta.rel = 'noopener noreferrer';
-            cta.textContent = 'Book a Call';
-            ty.appendChild(cta);
-          }
           wrapper.replaceWith(ty);
           scrollToBottom();
+          // Fetch settings fresh now (catches cases where init fetch returned stale/empty)
+          var settingsUrl = cfg.settingsUrl || cfg.apiUrl.replace(/\/chat$/, '/api/settings');
+          fetch(settingsUrl)
+            .then(function (r) { return r.ok ? r.json() : null; })
+            .then(function (d) {
+              var url = d && d.book_call_url;
+              if (!url) return;
+              state._settingsUrl = url;
+              var cta = document.createElement('a');
+              cta.className = 'dc-cta-btn';
+              cta.href = url;
+              cta.target = '_blank';
+              cta.rel = 'noopener noreferrer';
+              cta.textContent = 'Book a Call';
+              ty.appendChild(cta);
+              scrollToBottom();
+            })
+            .catch(function () {});
         })
         .catch(function () {
           submitBtn.disabled = false;
