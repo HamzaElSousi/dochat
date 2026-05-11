@@ -1,4 +1,5 @@
 import os
+import sqlite3
 from datetime import datetime
 from flask import Blueprint, redirect, render_template, url_for, current_app
 
@@ -61,12 +62,18 @@ def admin_leads():
     Leads ordered by created_at descending (most recent first).
     Table will be empty until Phase 6 populates it — no error shown (per D-12).
     """
-    conn = current_app.config.get('DB_CONN')
-    conn.execute("PRAGMA wal_checkpoint(PASSIVE)")
-    rows = conn.execute(
-        "SELECT id, name, email, question, created_at "
-        "FROM leads ORDER BY created_at DESC"
-    ).fetchall()
+    # Fresh connection — bypasses Passenger's persistent DB_CONN page cache
+    db_path = current_app.config.get('DB_PATH')
+    fresh = sqlite3.connect(db_path)
+    try:
+        fresh.execute("PRAGMA journal_mode=WAL")
+        fresh.execute("PRAGMA busy_timeout=10000")
+        rows = fresh.execute(
+            "SELECT id, name, email, question, created_at "
+            "FROM leads ORDER BY created_at DESC"
+        ).fetchall()
+    finally:
+        fresh.close()
 
     leads = []
     for row in rows:
@@ -91,9 +98,16 @@ def admin_settings():
     GET /dochat/admin/settings — protected by @require_auth (D-11).
     Fetches current book_call_url from settings table (empty string if not set).
     """
-    conn = current_app.config.get('DB_CONN')
-    row = conn.execute(
-        "SELECT value FROM settings WHERE key = ?", ['book_call_url']
-    ).fetchone()
+    # Fresh connection — bypasses Passenger's persistent DB_CONN page cache
+    db_path = current_app.config.get('DB_PATH')
+    fresh = sqlite3.connect(db_path)
+    try:
+        fresh.execute("PRAGMA journal_mode=WAL")
+        fresh.execute("PRAGMA busy_timeout=10000")
+        row = fresh.execute(
+            "SELECT value FROM settings WHERE key = ?", ['book_call_url']
+        ).fetchone()
+    finally:
+        fresh.close()
     book_call_url = row[0] if row else ''
     return render_template('admin/settings.html', book_call_url=book_call_url, active_page='settings')

@@ -1,4 +1,5 @@
 import os
+import sqlite3
 import uuid
 from datetime import datetime, timezone
 from flask import Blueprint, request, jsonify, current_app
@@ -283,11 +284,17 @@ def public_settings():
     if request.method == 'OPTIONS':
         return ('', 204, cors)
 
-    conn = current_app.config.get('DB_CONN')
-    conn.execute("PRAGMA wal_checkpoint(PASSIVE)")
-    row = conn.execute(
-        "SELECT value FROM settings WHERE key = ?", ['book_call_url']
-    ).fetchone()
+    # Fresh connection — bypasses Passenger's persistent DB_CONN page cache
+    db_path = current_app.config.get('DB_PATH')
+    fresh = sqlite3.connect(db_path)
+    try:
+        fresh.execute("PRAGMA journal_mode=WAL")
+        fresh.execute("PRAGMA busy_timeout=10000")
+        row = fresh.execute(
+            "SELECT value FROM settings WHERE key = ?", ['book_call_url']
+        ).fetchone()
+    finally:
+        fresh.close()
     book_call_url = row[0] if row else ''
 
     resp = jsonify({"book_call_url": book_call_url})
