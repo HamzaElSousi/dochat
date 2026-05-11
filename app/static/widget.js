@@ -565,12 +565,21 @@
     return div;
   }
 
+  function linkify(text) {
+    var escaped = text
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    return escaped.replace(/https?:\/\/[^\s<>"]+/g, function (url) {
+      return '<a href="' + url + '" target="_blank" rel="noopener noreferrer" style="color:var(--dc-primary)">' + url + '</a>';
+    });
+  }
+
   function addBotBubble(text, chips) {
     var wrapper = document.createElement('div');
 
     var div = document.createElement('div');
     div.className = 'dc-bubble dc-bubble-bot';
-    div.textContent = text;
+    div.innerHTML = linkify(text);
     wrapper.appendChild(div);
 
     // Render chips (max 3; only when chips is a non-empty array)

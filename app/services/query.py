@@ -257,7 +257,9 @@ def handle_chat(
         f"You are {ASSISTANT_NAME}, {ASSISTANT_PERSONA}. "
         "Answer ONLY using the context provided below. "
         "If the context does not contain enough information to answer the question, "
-        "say you don't know. Do not use any outside knowledge.\n\n"
+        "say you don't know. Do not use any outside knowledge. "
+        "When mentioning any URL or link, always write the full address including https:// "
+        "(e.g. https://social-automate.com/book, never just social-automate.com/book).\n\n"
         f"Context:\n{context_text}\n\n"
         "After your answer, on a new line, output EXACTLY this JSON and nothing else after it:\n"
         '{"chips": ["<question 1>", "<question 2>", "<question 3>"]}\n'
