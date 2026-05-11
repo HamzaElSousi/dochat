@@ -11,3 +11,9 @@ RewriteRule ^dochat/api/settings/?$        /app.cgi/dochat/api/settings [QSA,L]
 
 # Admin settings page (GET) and save (POST)
 RewriteRule ^dochat/admin/settings/?$      /app.cgi/dochat/admin/settings [QSA,L]
+
+# Admin JS file (no static catch-all in .htaccess — must route explicitly)
+RewriteRule ^dochat/admin\.js$             /app.cgi/dochat/admin.js [QSA,L]
+
+# Doc delete via POST (SiteGround blocks DELETE method)
+RewriteRule ^dochat/admin/docs/([^/]+)/delete/?$  /app.cgi/dochat/admin/docs/$1/delete [QSA,L]

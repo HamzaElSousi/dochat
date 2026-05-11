@@ -133,6 +133,7 @@ def admin_url_ingest():
     return jsonify(result), 200
 
 
+@admin_api_bp.route('/dochat/admin/docs/<doc_id>/delete', methods=['POST'])
 @admin_api_bp.route('/dochat/admin/docs/<doc_id>', methods=['DELETE'])
 @require_auth
 def admin_delete_doc(doc_id):

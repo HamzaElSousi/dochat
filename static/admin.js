@@ -132,7 +132,7 @@ function resetUrlForm() {
 /* deleteDoc(docId, filename) — confirm + DELETE + remove row */
 function deleteDoc(docId, filename) {
   if (!confirm('Delete ' + filename + '? This removes all indexed chunks.')) return;
-  fetch('/dochat/admin/docs/' + docId, { method: 'DELETE' })
+  fetch('/dochat/admin/docs/' + docId + '/delete', { method: 'POST' })
     .then(function(res) {
       if (res.ok) {
         var row = document.getElementById('doc-row-' + docId);

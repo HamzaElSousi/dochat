@@ -16,8 +16,10 @@ def create_app():
                 static_folder=_os.path.join(_root, 'static'))
 
     app.config['SECRET_KEY'] = os.environ['SECRET_KEY']
-    # os.path.expanduser is required — Python does not auto-expand ~ in strings.
-    app.config['STORAGE_PATH'] = os.path.expanduser('~/dochat/storage')
+    # Derive storage path from __file__ so it resolves correctly in Passenger/CGI
+    # where HOME may differ from the SSH user's home. Env override supported.
+    _repo = _os.path.dirname(_os.path.dirname(_os.path.abspath(__file__)))
+    app.config['STORAGE_PATH'] = _os.environ.get('STORAGE_PATH') or _os.path.join(_repo, 'storage')
 
     init_db(app)
 
@@ -26,6 +28,12 @@ def create_app():
     app.register_blueprint(chat_bp)       # new — D-04
     app.register_blueprint(admin_bp)
     app.register_blueprint(admin_api_bp)
+
+    @app.route('/dochat/admin.js')
+    def admin_js():
+        """Serve admin UI JS. Needs an explicit route — no static catch-all in .htaccess."""
+        static_dir = _os.path.join(_os.path.dirname(_os.path.dirname(_os.path.abspath(__file__))), 'static')
+        return send_from_directory(static_dir, 'admin.js', mimetype='application/javascript', max_age=60)
 
     @app.route('/dochat/widget.js')
     def widget_js():
