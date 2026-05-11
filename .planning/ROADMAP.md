@@ -45,7 +45,7 @@ Plans:
 **Success Criteria** (what must be TRUE):
   1. Admin uploads a PDF file and the system successfully parses, chunks, embeds, and stores its content in sqlite-vec
   2. Admin uploads a DOCX file and a TXT/MD file — both are indexed without error
-  3. Admin submits a URL; trafilatura crawls the page and indexes the extracted text as chunks
+  3. Admin submits a URL; trafilatura crawls the page and indexes the extracted text as plain text
   4. A corrupt, password-protected, or JS-rendered-empty document returns a clear error message to admin and leaves the index unchanged (rollback confirmed)
   5. Chunks are created with 512-token size and 100-token overlap using RecursiveCharacterTextSplitter; embeddings come from OpenRouter `text-embedding-3-small` (no local ML model invoked)
 **Plans:** 4 plans
@@ -149,11 +149,24 @@ Plans:
 **Depends on:** Phase 3, Phase 5
 **Requirements:** LEADS-01, LEADS-02, LEADS-03, LEADS-04
 **Success Criteria** (what must be TRUE):
-  1. When similarity threshold is not met, the widget displays an inline form with name and email fields (no external redirect, no page reload)
-  2. After form submission, a "Book a call" CTA link appears with the URL configured in `DocChatConfig`
-  3. Submitting the form triggers an email notification to admin via SMTP/sendmail (email arrives within 60 seconds)
-  4. The captured lead (name, email, question, timestamp) appears in the leads SQLite table and is visible in the admin UI leads view
-**Plans:** TBD
+  1. When similarity threshold is not met, the widget displays an inline form with name, email, and phone fields (no external redirect, no page reload)
+  2. After form submission, a "Book a Call" CTA button appears with the URL configured via admin Settings tab
+  3. Submitting the form triggers an email notification to admin via SMTP (email arrives within 60 seconds)
+  4. The captured lead (name, email, phone, question, timestamp) appears in the leads SQLite table and is visible in the admin UI leads view
+**Plans:** 4 plans
+
+Plans:
+- [ ] 06-01-PLAN.md — DB migrations (phone column + settings table) + app/services/email.py SMTP service
+- [ ] 06-02-PLAN.md — Backend routes: POST /dochat/api/leads + GET /dochat/api/settings + GET/POST /dochat/admin/settings
+- [ ] 06-03-PLAN.md — Admin Settings UI (base.html nav tab + settings.html + admin.js) + widget.js lead form (_leadSubmitted, fetchSettings, addLeadForm, CTA)
+- [ ] 06-04-PLAN.md — Test suite (tests/test_leads.py, 16 tests) + staging_htaccess_patch_phase6.txt + human staging checkpoint
+
+**Wave dependency notes:**
+- **Wave 1** — 06-01 (DB + email service foundation)
+- **Wave 2** *(both blocked on Wave 1, parallel with each other)* — 06-02 (backend routes), 06-03 (admin UI + widget JS)
+- **Wave 3** *(blocked on all Wave 2)* — 06-04 (tests + .htaccess + human checkpoint)
+
+**Cross-cutting constraints:** No torch/transformers; manual `BEGIN`/`COMMIT`/`ROLLBACK` only; no `with conn:`; all DB via `_open_db()`; CORS on public widget endpoints; `@require_auth` on all `/dochat/admin/*` routes; SMTP failure is non-fatal (lead saved, log to stderr); CGI deployment — no background workers.
 
 ---
 
@@ -166,7 +179,7 @@ Plans:
 | 3. Query Pipeline & RAG Logic | 5/5 | Complete | 2026-05-09 |
 | 4. Admin UI | 0/4 | In progress | - |
 | 5. Chat Widget | 3/3 | Complete | 2026-05-10 |
-| 6. Lead Capture | 0/? | Not started | - |
+| 6. Lead Capture | 0/4 | Planning complete | - |
 
 ---
 
@@ -222,3 +235,4 @@ Plans:
 *Updated: 2026-05-09 — Phase 3 complete (5/5 plans; handle_chat RAG pipeline, /chat route, CORS, archive cron, 62/62 tests pass)*
 *Updated: 2026-05-09 — Phase 4 plans created (04-01 through 04-04); 4 plans in 4 waves*
 *Updated: 2026-05-09 — Phase 5 plans created (05-01 through 05-03); 3 plans in 2 waves*
+*Updated: 2026-05-10 — Phase 6 plans created (06-01 through 06-04); 4 plans in 3 waves*

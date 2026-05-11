@@ -8,6 +8,14 @@ from ..auth import require_auth
 admin_bp = Blueprint('admin', __name__)
 
 
+@admin_bp.after_request
+def no_cache(response):
+    """Prevent LiteSpeed/proxy caches from serving stale admin HTML."""
+    response.headers['Cache-Control'] = 'no-store, must-revalidate'
+    response.headers['Pragma'] = 'no-cache'
+    return response
+
+
 def _format_datetime(iso_str: str) -> str:
     """Format ISO-8601 UTC string to 'MMM D, YYYY HH:MM' for display."""
     try:

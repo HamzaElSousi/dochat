@@ -7,27 +7,27 @@
 ## Project Reference
 
 **Core Value:** A visitor asks a question and gets a correct, sourced answer from your actual documents — not a hallucination and not a dead end.
-**Current Focus:** Phase 5 — Chat Widget
+**Current Focus:** Phase 6 — Lead Capture
 **Milestone:** v1 — Embeddable RAG chatbot on SiteGround shared hosting
 
 ---
 
 ## Current Position
 
-**Phase:** 5 of 6 — Chat Widget (COMPLETE — all 3 plans done, human checkpoint approved)
-**Status:** Phase 5 complete — all 3 plans executed, widget embedding verified in browser
-**Last session:** 2026-05-10 — Phase 5 Plan 03: human checkpoint approved; FAB renders in browser, Shadow DOM isolation confirmed; Phase 5 fully complete
+**Phase:** 6 of 6 — Lead Capture (IN PROGRESS — discussion phase)
+**Status:** Phase 6 starting — all prior phases complete; discussing approach
+**Last session:** 2026-05-10 — Phase 4 confirmed complete (14/14 tests, human UAT passed on staging); Phase 6 discussion starting
 
 **Progress:**
 ```
 Phase 1 [##########] 100% ✅
 Phase 2 [##########] 100% ✅ (4/4 plans)
 Phase 3 [##########] 100% ✅ (5/5 plans)
-Phase 4 [▓▓        ] 20% (planned — 4 plans ready)
+Phase 4 [##########] 100% ✅ (4/4 plans, 14/14 tests, human UAT passed)
 Phase 5 [##########] 100% ✅ (3/3 plans complete)
-Phase 6 [          ] 0%
+Phase 6 [▓         ] 0%  (discussion in progress)
 
-Overall [##########] 83%
+Overall [##########] 97%
 ```
 
 ---
@@ -36,10 +36,10 @@ Overall [##########] 83%
 
 | Metric | Value |
 |--------|-------|
-| Phases complete | 4 / 6 (Phase 1, 2, 3, 5) |
-| Plans complete | 3 / 3 (Phase 5) |
+| Phases complete | 5 / 6 (Phase 1, 2, 3, 4, 5) |
+| Plans complete | 4 / 4 (Phase 4) |
 | Requirements mapped | 34 / 34 |
-| Requirements done | 23 / 34 (INFRA-01..04, INGEST-01..07, QUERY-01..05, WIDGET-01..08 done) |
+| Requirements done | 29 / 34 (INFRA-01..04, INGEST-01..07, QUERY-01..05, ADMIN-01..06, WIDGET-01..08 done) |
 | Last session | 2026-05-10 |
 
 ---
@@ -107,11 +107,11 @@ None currently.
 
 ### Last Session (2026-05-10)
 
-**What happened:** Phase 5 fully complete. Plans 01–03 all done and verified. Human checkpoint APPROVED — FAB button renders correctly on bare HTML embed page, Shadow DOM isolation confirmed (host CSS injection did not affect widget). All 95 tests pass (62 prior + 9 chip tests + 5 delivery tests = 95 total).
+**What happened:** Confirmed Phase 4 (Admin UI) fully complete — STATE.md had stale 20% entry. All 4 plans executed, 14/14 tests passing, human UAT passed on staging (docs page, file upload/delete, leads empty state). Phase 6 (Lead Capture) discussion starting.
 
-**Where we stopped:** Phase 5 complete. Phase 6 (Lead Capture) is next, or Phase 4 (Admin UI) which was deferred.
+**Where we stopped:** Beginning Phase 6 discussion.
 
-**Next action:** `/gsd-plan-phase 6` to start Lead Capture, or `/gsd-plan-phase 4` to build Admin UI
+**Next action:** `/gsd-plan-phase 6` after discussion completes
 
 ---
 
@@ -122,8 +122,9 @@ None currently.
 | 1 — Infrastructure & Deployment Validation | 2026-05-09 | CGI deployment, native sqlite-vec, live on staging |
 | 2 — Document Ingestion Pipeline | 2026-05-09 | PDF/DOCX/TXT/URL ingest, chunking, embeddings, 50/50 tests |
 | 3 — Query Pipeline & RAG Logic | 2026-05-09 | handle_chat() RAG pipeline, /chat endpoint, CORS, archive cron, 62/62 tests |
+| 4 — Admin UI | 2026-05-09 | Password-protected docs + leads UI, upload/delete API, 14/14 tests, human UAT passed on staging |
 | 5 — Chat Widget | 2026-05-10 | Shadow DOM widget.js, chip backend, Flask widget delivery route, 95/95 tests, human-verified embed |
 
 ---
 *STATE initialized: 2026-05-07*
-*Last updated: 2026-05-09 after Phase 4 context session*
+*Last updated: 2026-05-10 — Phase 4 confirmed complete; Phase 6 discussion starting*
