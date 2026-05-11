@@ -10,6 +10,19 @@ from ..services.email import send_lead_notification
 
 admin_api_bp = Blueprint('admin_api', __name__)
 
+# DEBUG: temporary endpoint to diagnose DB read issues
+@admin_api_bp.route('/dochat/api/settings/debug')
+def settings_debug():
+    """Debug endpoint — return raw DB state."""
+    conn = current_app.config.get('DB_CONN')
+    if not conn:
+        return jsonify({"error": "no DB_CONN"}), 500
+
+    # Force a fresh read
+    conn.execute("PRAGMA wal_checkpoint(TRUNCATE)")
+    row = conn.execute("SELECT key, value FROM settings").fetchall()
+    return jsonify({"rows": [{"k": r[0], "v": r[1]} for r in row]}), 200
+
 MAX_FILE_BYTES = 10 * 1024 * 1024  # 10 MB (matches ingest.py T-02-08)
 
 # CORS allowlist for public widget endpoints — same pattern as chat.py (D-01)
@@ -271,6 +284,7 @@ def public_settings():
         return ('', 204, cors)
 
     conn = current_app.config.get('DB_CONN')
+    conn.execute("PRAGMA wal_checkpoint(PASSIVE)")
     row = conn.execute(
         "SELECT value FROM settings WHERE key = ?", ['book_call_url']
     ).fetchone()

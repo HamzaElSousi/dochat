@@ -62,6 +62,7 @@ def admin_leads():
     Table will be empty until Phase 6 populates it — no error shown (per D-12).
     """
     conn = current_app.config.get('DB_CONN')
+    conn.execute("PRAGMA wal_checkpoint(PASSIVE)")
     rows = conn.execute(
         "SELECT id, name, email, question, created_at "
         "FROM leads ORDER BY created_at DESC"
