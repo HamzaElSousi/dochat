@@ -8,6 +8,13 @@ from datetime import datetime, timezone
 import requests
 
 from app.ingest.embedder import embed_query
+from app.llm_config import (
+    fallback_model,
+    llm_api_key,
+    llm_base_url,
+    primary_model,
+    requires_api_key,
+)
 from app.services.ingestion import serialize_f32
 
 # ── Module-level constants (read from env on first import) ──────────────────
@@ -18,17 +25,17 @@ FALLBACK_MESSAGE = os.environ.get(
 )
 ASSISTANT_NAME = os.environ.get('ASSISTANT_NAME', 'DocChat Assistant')
 ASSISTANT_PERSONA = os.environ.get('ASSISTANT_PERSONA', 'a helpful AI assistant')
-PRIMARY_MODEL = os.environ.get('PRIMARY_MODEL', 'meta-llama/llama-3.3-70b-instruct:free')
-FALLBACK_MODEL = os.environ.get('FALLBACK_MODEL', 'google/gemma-3-12b-it:free')
-LLM_TIMEOUT = 30          # seconds per model attempt (D-13)
+LLM_TIMEOUT = 60          # seconds per model attempt (local models can be slower than hosted)
 TOP_K = 4                 # top chunks to retrieve (QUERY-01)
 MAX_HISTORY_TURNS = 10    # turns = user+assistant pairs; cap = 20 messages (QUERY-04)
 
-# Warn at module load if API key is absent — prevents silent 401 fallbacks (WR-01)
-if not os.environ.get('OPENROUTER_API_KEY'):
+# Warn at module load if a hosted key is needed but absent — prevents silent 401
+# fallbacks (WR-01). With LLM_PROVIDER=ollama no key is required, so stay quiet.
+if requires_api_key() and not os.environ.get('OPENROUTER_API_KEY'):
     import warnings
     warnings.warn(
-        "OPENROUTER_API_KEY is not set — all LLM calls will fail and return fallback message.",
+        "OPENROUTER_API_KEY is not set — hosted LLM/embedding calls will fail and "
+        "return the fallback message. Set LLM_PROVIDER=ollama to run fully local.",
         RuntimeWarning,
         stacklevel=2,
     )
@@ -37,15 +44,18 @@ if not os.environ.get('OPENROUTER_API_KEY'):
 # ── LLM helpers ─────────────────────────────────────────────────────────────
 
 def _call_llm(messages: list[dict], model: str) -> str:
-    """POST to OpenRouter chat completions. Raises requests.HTTPError or Timeout on failure."""
-    api_key = os.environ.get('OPENROUTER_API_KEY', '')
+    """POST to the configured chat-completions endpoint (OpenRouter or Ollama).
+
+    Raises requests.HTTPError or Timeout on failure.
+    """
+    api_key = llm_api_key()
+    headers = {'Content-Type': 'application/json'}
+    if api_key:
+        headers['Authorization'] = f'Bearer {api_key}'
     response = requests.post(
-        'https://openrouter.ai/api/v1/chat/completions',
-        headers={
-            'Authorization': f'Bearer {api_key}',
-            'Content-Type': 'application/json',
-        },
-        json={'model': model, 'messages': messages},
+        f'{llm_base_url()}/chat/completions',
+        headers=headers,
+        json={'model': model, 'messages': messages, 'stream': False},
         timeout=LLM_TIMEOUT,
     )
     response.raise_for_status()
@@ -53,7 +63,7 @@ def _call_llm(messages: list[dict], model: str) -> str:
     try:
         content = data['choices'][0]['message']['content']
     except (KeyError, IndexError, TypeError):
-        # OpenRouter returns 200 with no choices on content-filter refusals / overload
+        # Providers return 200 with no choices on content-filter refusals / overload
         raise requests.RequestException(f"Malformed LLM response: {data!r}")
     if content is None:
         raise requests.RequestException("LLM returned null content")
@@ -61,10 +71,10 @@ def _call_llm(messages: list[dict], model: str) -> str:
 
 
 def _call_llm_with_retry(messages: list[dict]) -> str | None:
-    """Try PRIMARY_MODEL; on 429/timeout/error retry with FALLBACK_MODEL.
+    """Try the primary model; on 429/timeout/error retry with the fallback model.
     Returns None if both fail (caller uses FALLBACK_MESSAGE, D-14).
     """
-    for model in (PRIMARY_MODEL, FALLBACK_MODEL):
+    for model in (primary_model(), fallback_model()):
         try:
             return _call_llm(messages, model)
         except (requests.exceptions.Timeout, requests.HTTPError, requests.RequestException):

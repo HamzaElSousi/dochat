@@ -3,7 +3,7 @@
 A production-ready Retrieval-Augmented Generation (RAG) chatbot engineered to run inside the hard constraints of SiteGround shared hosting. Visitors ask questions; the system answers from a curated document library managed by the site admin. Embeds on any website with a single `<script>` tag.
 
 **Live deployment:** social-automate.com  
-**Stack:** Python · Flask · SQLite + sqlite-vec · OpenRouter API · Vanilla JS (Shadow DOM)
+**Stack:** Python · Flask · SQLite + sqlite-vec · OpenRouter API or local Ollama · Vanilla JS (Shadow DOM)
 
 ---
 
@@ -26,7 +26,7 @@ Most RAG tutorials assume you control your infrastructure — a VPS, a cloud VM,
 | **Process model** | Gunicorn / uvicorn (persistent) | Apache CGI (`wsgiref.handlers.CGIHandler`) — fresh Python process per request |
 | **Web framework** | FastAPI (ASGI) | Flask (WSGI) — CGI only supports WSGI |
 | **Vector store** | ChromaDB / FAISS / Pinecone | `sqlite-vec` — native SQLite extension, single `.db` file |
-| **Embeddings** | `sentence-transformers`, PyTorch | OpenRouter API — PyTorch would OOM-kill the CGI process |
+| **Embeddings** | `sentence-transformers`, PyTorch | OpenRouter API (or local Ollama over HTTP) — PyTorch would OOM-kill the CGI process |
 | **State** | In-memory caches, background workers | All state in SQLite; WAL mode for cross-process read safety |
 | **RAM budget** | Unconstrained | ~256 MB per CGI process; zero tolerance for memory spikes |
 | **Data storage** | S3, filesystem, object store | `~/dochat/storage/` (outside `public_html/`, not web-accessible) |
@@ -315,6 +315,22 @@ pytest -v
 ```
 
 The app uses `STORAGE_PATH` from `.env` (or `./storage/` by default) for the SQLite DB and uploaded files. The dev server will create `storage/dochat.db` on first request to `/dochat/health`.
+
+### Run fully local with Ollama (no API key)
+
+DocChat talks to any OpenAI-compatible endpoint, so you can run it entirely offline against a local [Ollama](https://ollama.com) server. This is ideal for development and testing. Ollama runs as a separate process reached over HTTP, so this does not add `torch`/`transformers` to the app and keeps the shared-hosting RAM budget intact.
+
+```bash
+ollama pull llama3              # chat model (or gemma4:e4b, mistral, ...)
+ollama pull nomic-embed-text    # embeddings (768-dim)
+
+# In .env:
+LLM_PROVIDER=ollama             # flips both chat and embeddings to local
+PRIMARY_MODEL=llama3
+# embeddings default to nomic-embed-text (768 dims) automatically
+```
+
+Switch back to production by setting `LLM_PROVIDER=openrouter` and an `OPENROUTER_API_KEY`. The embedding dimension differs between providers (1536 for OpenRouter, 768 for Ollama), so re-ingest your documents after switching.
 
 ---
 

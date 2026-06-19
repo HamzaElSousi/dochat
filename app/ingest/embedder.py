@@ -1,15 +1,17 @@
-import os
 import requests
 
+from app.llm_config import embed_base_url, embed_dim, embed_model, llm_api_key
 
-EMBED_MODEL = "openai/text-embedding-3-small"
-EMBED_DIM = 1536
-SUBBATCH_SIZE = 100   # max texts per OpenRouter call (conservative — rate limit undocumented)
+SUBBATCH_SIZE = 100   # max texts per embeddings call (conservative — rate limit undocumented)
 EMBED_TIMEOUT = 30    # seconds; leaves headroom within 60s Apache CGI limit
 
 
 def embed_chunks(chunk_texts: list[str]) -> list[list[float]]:
-    """Embed all chunks via OpenRouter batch API. Returns list of 1536-dim float vectors.
+    """Embed all chunks via the configured provider's batch API.
+
+    Uses OpenRouter (text-embedding-3-small, 1536-dim) by default, or a local
+    Ollama server (nomic-embed-text, 768-dim) when EMBED_PROVIDER=ollama. Both
+    expose the same OpenAI-compatible /v1/embeddings shape.
 
     If len(chunk_texts) > SUBBATCH_SIZE, splits into sequential sub-batches of 100
     to avoid undocumented per-request input limits.
@@ -20,20 +22,22 @@ def embed_chunks(chunk_texts: list[str]) -> list[list[float]]:
     if not chunk_texts:
         raise ValueError("Cannot embed empty chunk list")
 
-    api_key = os.environ.get('OPENROUTER_API_KEY', '')
+    api_key = llm_api_key()
+    model = embed_model()
+    expected_dim = embed_dim()
+    headers = {"Content-Type": "application/json"}
+    if api_key:
+        headers["Authorization"] = f"Bearer {api_key}"
 
     # Sub-batch into groups of SUBBATCH_SIZE
     all_embeddings: list[list[float]] = []
     for i in range(0, len(chunk_texts), SUBBATCH_SIZE):
         batch = chunk_texts[i: i + SUBBATCH_SIZE]
         response = requests.post(
-            "https://openrouter.ai/api/v1/embeddings",
-            headers={
-                "Authorization": f"Bearer {api_key}",
-                "Content-Type": "application/json",
-            },
+            f"{embed_base_url()}/embeddings",
+            headers=headers,
             json={
-                "model": EMBED_MODEL,
+                "model": model,
                 "input": batch,
             },
             timeout=EMBED_TIMEOUT,
@@ -43,10 +47,10 @@ def embed_chunks(chunk_texts: list[str]) -> list[list[float]]:
         # Sort by index to ensure ordering matches input order
         batch_embeddings = sorted(data["data"], key=lambda x: x["index"])
         for e in batch_embeddings:
-            if len(e["embedding"]) != EMBED_DIM:
+            if len(e["embedding"]) != expected_dim:
                 raise ValueError(
                     f"API returned embedding dimension {len(e['embedding'])}, "
-                    f"expected {EMBED_DIM}. Check EMBED_MODEL or API response."
+                    f"expected {expected_dim}. Check EMBED_MODEL / EMBED_DIM or the API response."
                 )
             all_embeddings.append(e["embedding"])
 
@@ -56,7 +60,8 @@ def embed_chunks(chunk_texts: list[str]) -> list[list[float]]:
 def embed_query(text: str) -> list[float]:
     """Embed a single visitor query string. Thin wrapper around embed_chunks().
 
-    Returns a 1536-dim float vector (same model as document embeddings).
+    Returns a float vector matching the configured embedding model's dimension
+    (same model as document embeddings).
     Raises ValueError on empty input; raises requests.HTTPError on API failure.
     """
     return embed_chunks([text])[0]

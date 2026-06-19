@@ -69,9 +69,13 @@ def init_document_tables(conn: sqlite3.Connection) -> None:
             chunk_index INTEGER NOT NULL
         )
     """)
-    conn.execute("""
+    # Vector dimension follows the configured embedding model: 1536 for OpenRouter
+    # text-embedding-3-small (default), 768 for Ollama nomic-embed-text. The DB must
+    # be re-ingested if this changes — documents and queries must share a dimension.
+    from app.llm_config import embed_dim
+    conn.execute(f"""
         CREATE VIRTUAL TABLE IF NOT EXISTS vec_items
-        USING vec0(embedding float[1536] distance_metric=cosine)
+        USING vec0(embedding float[{embed_dim()}] distance_metric=cosine)
     """)
     conn.execute("""
         CREATE TABLE IF NOT EXISTS chunk_embeddings (
