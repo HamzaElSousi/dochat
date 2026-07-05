@@ -1,6 +1,10 @@
 # DocChat — Embeddable RAG Chatbot for Shared Hosting
 
-A production-ready Retrieval-Augmented Generation (RAG) chatbot engineered to run inside the hard constraints of SiteGround shared hosting. Visitors ask questions; the system answers from a curated document library managed by the site admin. Embeds on any website with a single `<script>` tag.
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
+[![Tests](https://img.shields.io/badge/tests-107%20passing-brightgreen.svg)](#test-suite)
+
+A production-ready Retrieval-Augmented Generation (RAG) chatbot engineered to run inside the hard constraints of SiteGround shared hosting: **sub-20ms vector search (sqlite-vec) within a ~256 MB per-process RAM budget, on Apache CGI where every request is a cold start**. Visitors ask questions; the system answers from a curated document library managed by the site admin. Embeds on any website with a single `<script>` tag.
 
 **Live deployment:** social-automate.com  
 **Stack:** Python · Flask · SQLite + sqlite-vec · OpenRouter API or local Ollama · Vanilla JS (Shadow DOM)
@@ -276,7 +280,7 @@ SiteGround's Apache configuration rejects non-standard HTTP methods (DELETE, PUT
 │   └── admin.js             # Symlinked / duplicated — served at /dochat/admin.js
 ├── templates/
 │   └── admin/               # Jinja2 templates (base, docs, leads, settings)
-├── tests/                   # ~200 pytest tests across 14 files
+├── tests/                   # 107 pytest tests across 11 files
 ├── scripts/
 │   ├── archive_sessions.py  # Standalone cron script for session archival
 │   └── test_email.py        # SMTP connectivity test (run manually: python3 scripts/test_email.py)
@@ -435,7 +439,7 @@ MYSQL_PASS=...
 ## Test Suite
 
 ```bash
-pytest -v                              # all ~200 tests
+pytest -v                              # all 107 tests
 pytest tests/test_chat.py -v           # RAG pipeline + LLM failover
 pytest tests/test_leads.py -v          # lead capture (16 tests)
 pytest tests/test_ingest_upload.py -v  # file ingestion
@@ -468,4 +472,4 @@ Tests use `pytest-mock` to stub OpenRouter API calls and SMTP — no external se
 
 ## License
 
-MIT
+MIT — see [LICENSE](LICENSE).
